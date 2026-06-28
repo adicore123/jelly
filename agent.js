@@ -51,6 +51,32 @@ const MASTER_SITES = [
   { name: "The Prairie Homestead", url: "https://www.theprairiehomestead.com", category: "ליקוט והתססה", feedUrl: "https://www.theprairiehomestead.com/feed/" }
 ];
 
+// Keywords to check if a title is relevant to fruit, jams, spreads, canning, or preserving
+const RELEVANT_KEYWORDS = [
+  // English keywords
+  'jam', 'jelly', 'jellies', 'marmalade', 'preserve', 'preserves', 'preserving', 'canning', 'canned', 
+  'pectin', 'fruit', 'fruits', 'berry', 'berries', 'strawberry', 'strawberries', 'apricot', 'apricots', 
+  'peach', 'peaches', 'plum', 'plums', 'fig', 'figs', 'orange', 'oranges', 'citrus', 'lemon', 'lemons', 
+  'cherry', 'cherries', 'spread', 'spreads', 'conserve', 'conserves', 'jar', 'jars', 'syrup', 'syrups', 
+  'rhubarb', 'currant', 'grape', 'grapes', 'pear', 'pears', 'apple', 'apples', 'quince', 'compote', 
+  'chutney', 'elderberry', 'blackberry', 'blueberries', 'blueberry', 'raspberry', 'raspberries',
+  // Hebrew keywords
+  'ריבה', 'ריבות', 'קונפיטורה', 'קונפיטורות', 'מרקחת', 'מרקחות', 'שימור', 'משמרים', 'פרי', 'פירות', 
+  'צנצנת', 'צנצנות', 'תות', 'תותים', 'משמש', 'משמשים', 'אפרסק', 'אפרסקים', 'שזיף', 'שזיפים', 
+  'תאנים', 'תאנה', 'תפוז', 'תפוזים', 'לימון', 'לימונים', 'קלמנטינה', 'אשכולית', 'פרי הדר', 
+  'מנדרינה', 'פירות יער', 'דובדבן', 'דובדבנים', 'אוכמניות', 'אוכמניה', 'פטל', 'חמוציות', 
+  'פקטין', 'סירופ', 'קומפוט', 'מרמלדה', 'ממרח', 'ממרחים'
+];
+
+function isTitleRelevant(title, siteCategory) {
+  // Science & preserving sites are 100% relevant by default
+  if (siteCategory === "מדע ושימור" || siteCategory === "שפים וארטיזנים") {
+    return true; 
+  }
+  const lowerTitle = title.toLowerCase();
+  return RELEVANT_KEYWORDS.some(keyword => lowerTitle.includes(keyword));
+}
+
 // ============================================================
 // 🌐 RSS FEED CRAWLER — Fetches live headlines from master sites
 // ============================================================
@@ -78,11 +104,14 @@ async function fetchSingleFeed(site) {
     // Simple XML title extraction (works for RSS and Atom feeds)
     const titles = [];
     const itemMatches = xmlText.match(/<item[\s>][\s\S]*?<\/item>/gi) || xmlText.match(/<entry[\s>][\s\S]*?<\/entry>/gi) || [];
-    for (const item of itemMatches.slice(0, 5)) { // max 5 titles per site
+    for (const item of itemMatches) {
       const titleMatch = item.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i);
       if (titleMatch && titleMatch[1]) {
         const cleanTitle = titleMatch[1].replace(/<[^>]+>/g, '').trim();
-        if (cleanTitle) titles.push(cleanTitle);
+        if (cleanTitle && isTitleRelevant(cleanTitle, site.category)) {
+          titles.push(cleanTitle);
+          if (titles.length >= 5) break; // max 5 titles per site
+        }
       }
     }
     
@@ -167,7 +196,7 @@ const JSON_SCHEMA_TEXT = `
 {
   "summary": "סיכום מגמות בעברית (3-5 משפטים) המסכם את הטרנדים שנמצאו ב-40 אתרי המאסטר, כולל ציון של אתרים ספציפיים שהשפיעו",
   "scannedSites": 40,
-  "liveFeedsFound": <number of feeds that returned titles>,
+  "liveFeedsFound": 10,
   "suggestions": [
     {
       "name": "שם הריבה בעברית (למשל: ריבת אפרסק, הל וזעפרן)",
@@ -176,7 +205,7 @@ const JSON_SCHEMA_TEXT = `
       "sweetness": "רמת המתיקות: מתוק מאוד, מתיקות בינונית, או מתיקות מעודנת",
       "twist": "הטוויסט המיוחד והייחודי של המתכון בעברית",
       "inspiration": "שם האתר/האתרים שהיוו השראה מתוך רשימת 40 אתרי המאסטר",
-      "ingredients": ["רשימת מצרכים מפורטת כולל כמויות בעברית ל-1 ק\\"ג פרי"],
+      "ingredients": ["רשימת מצרכים מפורטת כולל כמויות בעברית ל-1 קילו פרי"],
       "instructions": ["הוראות הכנה שלב אחר שלב בעברית"],
       "cookTime": "זמן בישול משוער"
     }
@@ -202,6 +231,7 @@ ${crawlContext}
 1. סכם את המגמות העדכניות ביותר בעולם הריבות, השימור והקונפיטורה (2025/2026).
 2. צור 2-3 מתכונים ייחודיים לריבות גורמה עם טוויסט קולינרי יצירתי.
 3. ציין לכל מתכון מאיזה אתר(ים) מרשימת המאסטר הוא שואב השראה.
+4. החלף את הערך של "liveFeedsFound" במספר הפידים החיים שבאמת נסרקו בהצלחה (לפי הדוח לעיל).
 
 You MUST output ONLY a valid JSON object (no markdown, no code fences) matching this schema:
 ${JSON_SCHEMA_TEXT}
@@ -213,6 +243,7 @@ ${JSON_SCHEMA_TEXT}
       { role: "system", content: GROQ_SYSTEM_PROMPT },
       { role: "user", content: userPrompt }
     ],
+    response_format: { type: "json_object" },
     temperature: 0.7,
     max_tokens: 4096
   };
@@ -288,6 +319,7 @@ async function callGroqCustomRecipe(apiKey, baseFruit, sweetness, twistType, not
       },
       { role: "user", content: prompt }
     ],
+    response_format: { type: "json_object" },
     temperature: 0.8,
     max_tokens: 2048
   };
