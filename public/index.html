@@ -367,13 +367,21 @@
         <div class="agent-hero-banner">
           <div class="agent-hero-content">
             <h2><i class="fa-solid fa-robot"></i> סוכן הטרנדים האוטומטי</h2>
-            <p>הסוכן סורק את האינטרנט, מזהה שילובים חמים בשווקים בינלאומיים ומייצר מתכונים יצירתיים עם טוויסט קולינרי ייחודי.</p>
+            <p>הסוכן סורק <strong>40 אתרי מאסטר</strong> מהארץ ומהעולם, מזהה טרנדים חיים בעולם הריבות והשימור, מתרגם הכל לעברית ומייצר מתכונים יצירתיים עם טוויסט קולינרי ייחודי.</p>
             <div class="agent-status-bar" id="agent-api-status">
               <!-- Rendered via JS based on settings -->
             </div>
             <button class="btn btn-secondary btn-lg" id="trigger-scan-btn">
-              <i class="fa-solid fa-magnifying-glass-chart"></i> הפעל סוכן וסרוק טרנדים חיים בעולם
+              <i class="fa-solid fa-magnifying-glass-chart"></i> 🔍 סרוק 40 אתרי מאסטר וצור מתכונים חיים!
             </button>
+          </div>
+        </div>
+
+        <!-- Master Sites Grid -->
+        <div class="master-sites-section" id="master-sites-section">
+          <h3><i class="fa-solid fa-globe"></i> 40 אתרי המאסטר הנסרקים</h3>
+          <div class="master-sites-grid" id="master-sites-grid">
+            <!-- Populated via JS from /api/agent/sites -->
           </div>
         </div>
 
@@ -413,12 +421,28 @@
             <div class="form-group" style="margin-bottom:1.5rem;">
               <label for="ai-provider-select">ספק בינה מלאכותית מועדף:</label>
               <select id="ai-provider-select" class="form-control" style="background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 8px; width: 100%; font-size: 0.95rem; cursor: pointer;">
-                <option value="gemini">Google Gemini (חיפוש חי בגוגל - דורש Billing)</option>
-                <option value="openrouter">OpenRouter (חינמי לחלוטין - מודל Llama 3 ללא צורך בכרטיס אשראי)</option>
+                <option value="groq">⚡ Groq Console (Llama 3.3 70B — מהיר במיוחד, חינמי!)</option>
+                <option value="openrouter">OpenRouter (חינמי — מודל Llama 3)</option>
+                <option value="gemini">Google Gemini (חיפוש חי בגוגל — דורש Billing)</option>
               </select>
             </div>
 
-            <div class="form-group" id="gemini-key-group">
+            <div class="form-group" id="groq-key-group">
+              <label for="groq-api-key-input">מפתח Groq API Key: <span class="required">*</span></label>
+              <div class="input-password-wrapper">
+                <input type="password" id="groq-api-key-input" placeholder="הכנס את מפתח ה-API שלך (Groq Console)">
+                <button type="button" class="btn-toggle-password" id="toggle-groq-key-visibility">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+              <p class="help-text">
+                מפתח Groq API נדרש לצורך הפעלת הסוכן במהירות מטורפת עם מודל Llama 3.3 70B.
+                <br>
+                ניתן להשיג מפתח בחינם בפורטל <a href="https://console.groq.com/" target="_blank" rel="noopener noreferrer">Groq Console <i class="fa-solid fa-arrow-up-right-from-square"></i></a>.
+              </p>
+            </div>
+
+            <div class="form-group hidden" id="gemini-key-group">
               <label for="gemini-api-key-input">מפתח Gemini API Key: <span class="required">*</span></label>
               <div class="input-password-wrapper">
                 <input type="password" id="gemini-api-key-input" placeholder="הכנס את מפתח ה-API שלך (AI Studio)">
@@ -427,7 +451,7 @@
                 </button>
               </div>
               <p class="help-text">
-                מפתח ה-API נדרש לצורך פנייה ל-Gemini. המפתח יישמר בבסיס הנתונים המקומי בשרת שלך.
+                מפתח ה-API נדרש לצורך פנייה ל-Gemini.
                 <br>
                 ניתן להשיג מפתח בחינם בפורטל <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">Google AI Studio <i class="fa-solid fa-arrow-up-right-from-square"></i></a>.
               </p>
@@ -442,9 +466,9 @@
                 </button>
               </div>
               <p class="help-text">
-                מפתח ה-API נדרש לצורך פנייה ל-OpenRouter. המפתח יישמר בבסיס הנתונים המקומי בשרת שלך.
+                מפתח ה-API נדרש לצורך פנייה ל-OpenRouter.
                 <br>
-                ניתן להשיג מפתח בחינם בפורטל <a href="https://openrouter.ai/" target="_blank" rel="noopener noreferrer">OpenRouter <i class="fa-solid fa-arrow-up-right-from-square"></i></a> ללא צורך בהזנת כרטיס אשראי.
+                ניתן להשיג מפתח בחינם בפורטל <a href="https://openrouter.ai/" target="_blank" rel="noopener noreferrer">OpenRouter <i class="fa-solid fa-arrow-up-right-from-square"></i></a>.
               </p>
             </div>
 
@@ -471,7 +495,7 @@
             </div>
             <div class="info-row">
               <span class="info-label">גרסת סוכן:</span>
-              <span class="info-value">Gemini 2.5 Flash with Google Search Grounding</span>
+              <span class="info-value">Groq Llama 3.3 70B + סורק 40 אתרי מאסטר</span>
             </div>
           </div>
         </div>

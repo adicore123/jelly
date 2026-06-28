@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { db } from './db.js';
-import { runAgentScan, generateCustomRecipe } from './agent.js';
+import { runAgentScan, generateCustomRecipe, MASTER_SITES } from './agent.js';
 
 dotenv.config();
 
@@ -154,6 +154,11 @@ app.post('/api/agent/scan', async (req, res) => {
   }
 });
 
+// Master Sites List Endpoint
+app.get('/api/agent/sites', (req, res) => {
+  res.json(MASTER_SITES);
+});
+
 // Settings Endpoints
 app.get('/api/settings', async (req, res) => {
   try {
@@ -162,19 +167,24 @@ app.get('/api/settings', async (req, res) => {
     const hasDbGeminiKey = !!settings.geminiApiKey;
     const hasEnvOpenRouterKey = !!process.env.OPENROUTER_API_KEY;
     const hasDbOpenRouterKey = !!settings.openRouterApiKey;
+    const hasEnvGroqKey = !!process.env.GROQ_API_KEY;
+    const hasDbGroqKey = !!settings.groqApiKey;
     
-    const aiProvider = settings.aiProvider || 'gemini';
-    const hasKey = aiProvider === 'openrouter' 
-      ? (hasEnvOpenRouterKey || hasDbOpenRouterKey)
-      : (hasEnvGeminiKey || hasDbGeminiKey);
+    const aiProvider = settings.aiProvider || 'groq';
+    let hasKey = false;
+    if (aiProvider === 'groq') hasKey = hasEnvGroqKey || hasDbGroqKey;
+    else if (aiProvider === 'openrouter') hasKey = hasEnvOpenRouterKey || hasDbOpenRouterKey;
+    else hasKey = hasEnvGeminiKey || hasDbGeminiKey;
 
     res.json({
       hasKey,
       aiProvider,
       hasGeminiKey: hasEnvGeminiKey || hasDbGeminiKey,
       hasOpenRouterKey: hasEnvOpenRouterKey || hasDbOpenRouterKey,
+      hasGroqKey: hasEnvGroqKey || hasDbGroqKey,
       usingEnvGemini: hasEnvGeminiKey,
-      usingEnvOpenRouter: hasEnvOpenRouterKey
+      usingEnvOpenRouter: hasEnvOpenRouterKey,
+      usingEnvGroq: hasEnvGroqKey
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -183,12 +193,13 @@ app.get('/api/settings', async (req, res) => {
 
 app.post('/api/settings', async (req, res) => {
   try {
-    const { geminiApiKey, aiProvider, openRouterApiKey } = req.body;
+    const { geminiApiKey, aiProvider, openRouterApiKey, groqApiKey } = req.body;
     const settings = await db.getSettings();
     
     if (aiProvider !== undefined) settings.aiProvider = aiProvider;
     if (geminiApiKey !== undefined) settings.geminiApiKey = geminiApiKey;
     if (openRouterApiKey !== undefined) settings.openRouterApiKey = openRouterApiKey;
+    if (groqApiKey !== undefined) settings.groqApiKey = groqApiKey;
     
     await db.saveSettings(settings);
     res.json({ success: true });

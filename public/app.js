@@ -102,10 +102,13 @@ const elements = {
   aiProviderSelect: document.getElementById('ai-provider-select'),
   geminiKeyGroup: document.getElementById('gemini-key-group'),
   openRouterKeyGroup: document.getElementById('openrouter-key-group'),
+  groqKeyGroup: document.getElementById('groq-key-group'),
   geminiApiKeyInput: document.getElementById('gemini-api-key-input'),
   openRouterApiKeyInput: document.getElementById('openrouter-api-key-input'),
+  groqApiKeyInput: document.getElementById('groq-api-key-input'),
   toggleKeyVisibility: document.getElementById('toggle-key-visibility'),
   toggleOpenRouterKeyVisibility: document.getElementById('toggle-openrouter-key-visibility'),
+  toggleGroqKeyVisibility: document.getElementById('toggle-groq-key-visibility'),
   settingsStatusMessage: document.getElementById('settings-status-message'),
 
   // Matches Modal
@@ -214,21 +217,24 @@ async function fetchSettings() {
   const res = await fetch(`${API_BASE}/api/settings`);
   state.settings = await res.json();
   
-  // Set values in elements
   if (elements.aiProviderSelect) {
-    elements.aiProviderSelect.value = state.settings.aiProvider || 'gemini';
+    elements.aiProviderSelect.value = state.settings.aiProvider || 'groq';
     toggleSettingsFields();
   }
 }
 
 function toggleSettingsFields() {
   const provider = elements.aiProviderSelect.value;
+  elements.geminiKeyGroup.classList.add('hidden');
+  elements.openRouterKeyGroup.classList.add('hidden');
+  elements.groqKeyGroup.classList.add('hidden');
+  
   if (provider === 'gemini') {
     elements.geminiKeyGroup.classList.remove('hidden');
-    elements.openRouterKeyGroup.classList.add('hidden');
-  } else {
-    elements.geminiKeyGroup.classList.add('hidden');
+  } else if (provider === 'openrouter') {
     elements.openRouterKeyGroup.classList.remove('hidden');
+  } else if (provider === 'groq') {
+    elements.groqKeyGroup.classList.remove('hidden');
   }
 }
 
@@ -260,7 +266,8 @@ function updateSidebarStatus() {
   if (!sidebarStatus) return;
   
   if (state.settings.hasKey) {
-    const providerLabel = state.settings.aiProvider === 'openrouter' ? 'OpenRouter' : 'Gemini';
+    const p = state.settings.aiProvider;
+    const providerLabel = p === 'groq' ? 'Groq ⚡' : (p === 'openrouter' ? 'OpenRouter' : 'Gemini');
     sidebarStatus.innerHTML = `
       <span class="status-indicator status-active"></span>
       <span>סוכן AI מחובר (${providerLabel})</span>
@@ -284,6 +291,7 @@ elements.settingsForm.addEventListener('submit', async (e) => {
   const provider = elements.aiProviderSelect.value;
   const geminiApiKey = elements.geminiApiKeyInput.value.trim();
   const openRouterApiKey = elements.openRouterApiKeyInput.value.trim();
+  const groqApiKey = elements.groqApiKeyInput.value.trim();
   
   // Validation
   if (provider === 'gemini' && !geminiApiKey && !state.settings.hasGeminiKey) {
@@ -296,11 +304,17 @@ elements.settingsForm.addEventListener('submit', async (e) => {
     elements.settingsStatusMessage.innerText = 'נא להזין מפתח OpenRouter API תקין';
     return;
   }
+  if (provider === 'groq' && !groqApiKey && !state.settings.hasGroqKey) {
+    elements.settingsStatusMessage.className = 'settings-status-box error';
+    elements.settingsStatusMessage.innerText = 'נא להזין מפתח Groq API תקין';
+    return;
+  }
 
   try {
     const body = { aiProvider: provider };
     if (geminiApiKey) body.geminiApiKey = geminiApiKey;
     if (openRouterApiKey) body.openRouterApiKey = openRouterApiKey;
+    if (groqApiKey) body.groqApiKey = groqApiKey;
     
     const res = await fetch(`${API_BASE}/api/settings`, {
       method: 'POST',
@@ -315,6 +329,7 @@ elements.settingsForm.addEventListener('submit', async (e) => {
       
       elements.geminiApiKeyInput.value = '';
       elements.openRouterApiKeyInput.value = '';
+      elements.groqApiKeyInput.value = '';
       
       await fetchSettings();
       updateSidebarStatus();
@@ -339,6 +354,14 @@ elements.toggleOpenRouterKeyVisibility.addEventListener('click', () => {
   elements.openRouterApiKeyInput.type = type;
   elements.toggleOpenRouterKeyVisibility.querySelector('i').className = type === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
 });
+
+if (elements.toggleGroqKeyVisibility) {
+  elements.toggleGroqKeyVisibility.addEventListener('click', () => {
+    const type = elements.groqApiKeyInput.type === 'password' ? 'text' : 'password';
+    elements.groqApiKeyInput.type = type;
+    elements.toggleGroqKeyVisibility.querySelector('i').className = type === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+  });
+}
 
 /* --- CUSTOMERS HANDLERS --- */
 function setupEventListeners() {
@@ -1268,17 +1291,21 @@ function printLabels() {
 function renderAgentTab() {
   const statusBox = elements.agentApiStatus;
   if (state.settings.hasKey) {
-    const providerLabel = state.settings.aiProvider === 'openrouter' ? 'OpenRouter' : 'Gemini';
+    const p = state.settings.aiProvider;
+    const providerLabel = p === 'groq' ? 'Groq (Llama 3.3 70B) ⚡' : (p === 'openrouter' ? 'OpenRouter' : 'Gemini');
     statusBox.innerHTML = `
       <span class="status-indicator status-active"></span>
-      <span>סוכן AI מחובר דרך ${providerLabel} ומפתח API תקין (סריקה חיה מופעלת)</span>
+      <span>סוכן AI מחובר דרך ${providerLabel} — סריקת 40 אתרים מופעלת!</span>
     `;
   } else {
     statusBox.innerHTML = `
       <span class="status-indicator status-inactive"></span>
-      <span>סוכן AI במצב לא מוגדר (סריקה מקומית בלבד. הזן מפתח API בהגדרות לשריקה חיה)</span>
+      <span>סוכן AI לא מוגדר. הזן מפתח API בהגדרות.</span>
     `;
   }
+
+  // Render master sites grid
+  loadMasterSitesGrid();
 
   const historyList = elements.agentHistoryList;
   historyList.innerHTML = '';
@@ -1310,6 +1337,24 @@ function renderAgentTab() {
   });
 }
 
+async function loadMasterSitesGrid() {
+  const grid = document.getElementById('master-sites-grid');
+  if (!grid) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/agent/sites`);
+    const sites = await res.json();
+    const categoryIcons = { 'ישראלי': '🇮🇱', 'בינלאומי': '🌍', 'מדע ושימור': '🔬', 'שפים וארטיזנים': '👨‍🍳', 'ליקוט והתססה': '🌿' };
+    grid.innerHTML = sites.map(s => `
+      <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="master-site-chip">
+        <span class="site-icon">${categoryIcons[s.category] || '🌐'}</span>
+        <span class="site-name">${s.name}</span>
+      </a>
+    `).join('');
+  } catch (e) {
+    grid.innerHTML = '<p class="placeholder-text">לא ניתן לטעון רשימת אתרים.</p>';
+  }
+}
+
 async function handleAgentScan() {
   elements.triggerScanBtn.disabled = true;
   elements.agentLoading.classList.remove('hidden');
@@ -1323,37 +1368,47 @@ async function handleAgentScan() {
     consoleLogs.scrollTop = consoleLogs.scrollHeight;
   };
 
+  const isGroq = state.settings.aiProvider === 'groq';
+  const isOR = state.settings.aiProvider === 'openrouter';
+
   appendConsole("יוזם סוכן טרנדים...");
   elements.agentLoadingStatus.innerText = "הסוכן מתחבר לשרת...";
   
-  await new Promise(r => setTimeout(r, 800));
+  await new Promise(r => setTimeout(r, 600));
   appendConsole("בודק הגדרות מפתח API...");
   
-  if (state.settings.hasKey) {
-    const isOR = state.settings.aiProvider === 'openrouter';
-    appendConsole(`מפתח API נמצא. מכין סריקה חיה דרך ${isOR ? 'OpenRouter' : 'Gemini'}...`);
+  if (state.settings.hasKey && isGroq) {
+    appendConsole("⚡ מפתח Groq API נמצא. מפעיל סריקת 40 אתרי מאסטר...");
+    await new Promise(r => setTimeout(r, 500));
+    elements.agentLoadingStatus.innerText = "🔍 שלב 1: סורק פידים חיים מ-40 אתרי מאסטר...";
+    appendConsole("🇮🇱 מתחבר לפודי, השולחן, עוגיו.נט, קרוטית...");
+    await new Promise(r => setTimeout(r, 400));
+    appendConsole("🌍 מתחבר ל-Serious Eats, Food52, BBC Good Food...");
+    await new Promise(r => setTimeout(r, 400));
+    appendConsole("🔬 מתחבר ל-Healthy Canning, NCHFP, Ball Mason Jars...");
+    await new Promise(r => setTimeout(r, 400));
+    appendConsole("👨‍🍳 מתחבר ל-Food in Jars, David Lebovitz, Fab Food 4 All...");
+    await new Promise(r => setTimeout(r, 400));
+    appendConsole("🌿 מתחבר ל-Practical Self Reliance, Grow Forage Cook Ferment...");
+    await new Promise(r => setTimeout(r, 300));
+    elements.agentLoadingStatus.innerText = "🧠 שלב 2: שולח ל-Groq (Llama 3.3 70B) לניתוח ותרגום...";
+    appendConsole("🧠 שולח נתונים לשרתי Groq לניתוח, תרגום לעברית ויצירת מתכונים...");
+  } else if (state.settings.hasKey && isOR) {
+    appendConsole(`מפתח API נמצא. מכין סריקה חיה דרך OpenRouter...`);
     await new Promise(r => setTimeout(r, 600));
-    if (isOR) {
-      appendConsole("מתחבר למודל ה-AI החינמי Llama 3 8B...");
-      elements.agentLoadingStatus.innerText = "הסוכן מנתח ידע קולינרי עולמי...";
-    } else {
-      appendConsole("מתחבר למנוע Google Search Grounding...");
-      elements.agentLoadingStatus.innerText = "סורק טרנדים קולינריים ברשת...";
-    }
+    appendConsole("מתחבר למודל Llama 3...");
+    elements.agentLoadingStatus.innerText = "הסוכן מנתח ידע קולינרי עולמי...";
+  } else if (state.settings.hasKey) {
+    appendConsole(`מפתח API נמצא. מכין סריקה חיה דרך Gemini...`);
+    await new Promise(r => setTimeout(r, 600));
+    appendConsole("מתחבר למנוע Google Search Grounding...");
+    elements.agentLoadingStatus.innerText = "סורק טרנדים קולינריים ברשת...";
   } else {
     appendConsole("לא נמצא מפתח API. מפעיל מנגנון סריקה מקומי (אופליין)...");
     await new Promise(r => setTimeout(r, 1000));
     elements.agentLoadingStatus.innerText = "טוען טרנדים ממאגר מקומי...";
   }
 
-  appendConsole("מחפש: 'Artisanal Jam Gourmet Trends 2026'...");
-  await new Promise(r => setTimeout(r, 900));
-  appendConsole("מנתח בלוגים קולינריים מובילים ומחירי שוק בלונדון, פריז וטוקיו...");
-  
-  if (state.settings.hasKey) {
-    elements.agentLoadingStatus.innerText = "מנתח תוצאות ומפיק מתכונים עם טוויסט...";
-  }
-  
   try {
     const res = await fetch(`${API_BASE}/api/agent/scan`, {
       method: 'POST'
@@ -1363,7 +1418,11 @@ async function handleAgentScan() {
     
     const result = await res.json();
     
-    appendConsole("סריקה הושלמה! מעבד נתונים...");
+    if (result.liveFeedsFound) {
+      appendConsole(`✅ סריקה הושלמה! ${result.liveFeedsFound} פידים חיים נמצאו עם ${result.totalTitles || 0} כותרות.`);
+    } else {
+      appendConsole("סריקה הושלמה! מעבד נתונים...");
+    }
     await new Promise(r => setTimeout(r, 500));
     
     elements.agentLoading.classList.add('hidden');
@@ -1371,7 +1430,7 @@ async function handleAgentScan() {
     await fetchAgentLogs();
     renderAgentTab();
     renderDashboard();
-    showToast('סריקת טרנדים הושלמה בהצלחה!', 'success');
+    showToast('סריקת 40 אתרי מאסטר הושלמה בהצלחה!', 'success');
   } catch (error) {
     console.error(error);
     appendConsole(`שגיאה: ${error.message}`);

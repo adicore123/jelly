@@ -150,6 +150,113 @@
   ],
   "agent_logs": [
     {
+      "id": "l_1782671932931",
+      "timestamp": "2026-06-28T18:38:52.931Z",
+      "query": "סריקת מאסטר חיה — 24 אתרים, 119 כותרות (Groq Llama 3.3 70B)",
+      "summary": "המגמות הנוכחיות בעולם הריבות, השימור והקונפיטורה (2025/2026) מראות עליה בפופולריות של ריבות עם טוויסטים קולינריים יצירתיים, כגון שילובים של תבלינים אקזוטיים, חומרים משומרים ופרחים אכילים. אתרים כגון Food in Jars, עוגיו.נט ו-Homestead and Chill, השפיעו רבות על התפתחות המגמות הללו.",
+      "suggestions": [
+        {
+          "name": "ריבת אפרסק עם הל וזעפרן",
+          "description": "ריבה מתוקה ומרעננת עם טוויסט של הל וזעפרן, מושלמת למריחה על טוסט או כתוספת ליוגורט",
+          "baseFruit": "אפרסק",
+          "sweetness": "מתוקה מאוד",
+          "twist": "הוספת הל וזעפרן לריבה",
+          "inspiration": "Food in Jars, עוגיו.נט",
+          "ingredients": [
+            "1 ק\"ג אפרסקים",
+            "200 גרם סוכר",
+            "1/4 כוס מים",
+            "1/4 כוס הל טחון",
+            "1/4 כוס זעפרן טחון"
+          ],
+          "instructions": [
+            "לשרוף את האפרסקים בתנור",
+            "למחוץ את האפרסקים ולערוב עם סוכר, מים, הל וזעפרן",
+            "לבשל הריבה עד שהיא מתוקה וסמיכה"
+          ],
+          "cookTime": "45 דקות"
+        },
+        {
+          "name": "ריבת תות עם רום וקנה סוכר",
+          "description": "ריבה אלכוהולית ומתוקה עם טוויסט של רום וקנה סוכר, מושלמת למריחה על עוגות או כתוספת לקפה",
+          "baseFruit": "תות",
+          "sweetness": "מתוקה מאוד",
+          "twist": "הוספת רום וקנה סוכר לריבה",
+          "inspiration": "David Lebovitz, Hilda's Kitchen Blog",
+          "ingredients": [
+            "1 ק\"ג תותים",
+            "200 גרם סוכר",
+            "1/4 כוס רום",
+            "1/4 כוס קנה סוכר"
+          ],
+          "instructions": [
+            "לשרוף את התותים בתנור",
+            "למחוץ את התותים ולערוב עם סוכר, רום וקנה סוכר",
+            "לבשל הריבה עד שהיא מתוקה וסמיכה"
+          ],
+          "cookTime": "30 דקות"
+        },
+        {
+          "name": "ריבת תפוח עם קינמון ודבש",
+          "description": "ריבה חורפית ומרעננת עם טוויסט של קינמון ודבש, מושלמת למריחה על טוסט או כתוספת ליוגורט",
+          "baseFruit": "תפוח",
+          "sweetness": "מתוקה מאוד",
+          "twist": "הוספת קינמון ודבש לריבה",
+          "inspiration": "Homestead and Chill, Attainable Sustainable",
+          "ingredients": [
+            "1 ק\"ג תפוחים",
+            "200 גרם סוכר",
+            "1/4 כוס קינמון",
+            "1/4 כוס דבש"
+          ],
+          "instructions": [
+            "לשרוף את התפוחים בתנור",
+            "למחוץ את התפוחים ולערוב עם סוכר, קינמון ודבש",
+            "לבשל הריבה עד שהיא מתוקה וסמיכה"
+          ],
+          "cookTime": "40 דקות"
+        }
+      ],
+      "sources": [
+        {
+          "title": "פודי (Foody)",
+          "url": "https://foody.co.il"
+        },
+        {
+          "title": "השולחן",
+          "url": "https://www.hashulchan.co.il"
+        },
+        {
+          "title": "The Kitchen Coach (עז תלם)",
+          "url": "https://www.thekitchencoach.co.il"
+        },
+        {
+          "title": "עוגיו.נט (נטלי לוין)",
+          "url": "https://www.oogio.net"
+        },
+        {
+          "title": "קרוטית (אפרת ליכטנשטט)",
+          "url": "https://www.krutit.co.il"
+        },
+        {
+          "title": "בצק אלים",
+          "url": "https://www.bazekalim.com"
+        },
+        {
+          "title": "Epicurious",
+          "url": "https://www.epicurious.com"
+        },
+        {
+          "title": "BBC Good Food",
+          "url": "https://www.bbcgoodfood.com"
+        }
+      ],
+      "scannedSites": 40,
+      "liveFeedsFound": 24,
+      "totalTitles": 119,
+      "offline": false
+    },
+    {
       "id": "l1",
       "timestamp": "2026-06-27T12:00:00Z",
       "query": "טרנדים מובילים בריבות בוטיק 2026",
@@ -189,7 +296,8 @@
   ],
   "settings": {
     "geminiApiKey": "",
-    "aiProvider": "openrouter",
-    "openRouterApiKey": ""
+    "aiProvider": "groq",
+    "openRouterApiKey": "",
+    "groqApiKey": ""
   }
 }
