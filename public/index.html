@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RibaManager - ניהול עסק ריבות בוטיק וסוכן AI</title>
+  <!-- Google Fonts: Assistant for clean Hebrew typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- App Sidebar Layout -->
+  <div class="app-layout">
+    
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+      <button class="menu-toggle-btn" id="menu-toggle-btn">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="mobile-logo">
+        <span class="logo-emoji">🍓</span>
+        <span class="mobile-logo-text">RibaManager</span>
+      </div>
+    </div>
+    
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    
+    <!-- Sidebar -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="logo">
+        <span class="logo-emoji">🍓</span>
+        <div class="logo-text">
+          <h1>RibaManager</h1>
+          <p>ריבות בוטיק בעבודת יד</p>
+        </div>
+      </div>
+      
+      <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="dashboard-tab">
+          <i class="fa-solid fa-chart-simple"></i> לוח בקרה
+        </button>
+        <button class="tab-btn" data-tab="customers-tab">
+          <i class="fa-solid fa-users"></i> לקוחות
+        </button>
+        <button class="tab-btn" data-tab="recipes-tab">
+          <i class="fa-solid fa-book-open"></i> ספר המתכונים
+        </button>
+        <button class="tab-btn" data-tab="generator-tab">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> מחולל מתכונים
+        </button>
+        <button class="tab-btn" data-tab="production-tab">
+          <i class="fa-solid fa-scale-balanced"></i> כלי ייצור ועלויות
+        </button>
+        <button class="tab-btn" data-tab="agent-tab">
+          <i class="fa-solid fa-robot"></i> סוכן הטרנדים
+        </button>
+        <button class="tab-btn" data-tab="settings-tab">
+          <i class="fa-solid fa-gears"></i> הגדרות
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-status" id="sidebar-api-status">
+          <span class="status-indicator"></span>
+          <span>טוען סטטוס...</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-content">
+
+      <!-- DASHBOARD TAB -->
+      <section id="dashboard-tab" class="tab-content active">
+        <div class="welcome-banner">
+          <h2>ברוך הבא ל-RibaManager! 👋</h2>
+          <p>כאן תוכל לנהל את לקוחות הבוטיק שלך, לגלות שילובים חדשים בעולם, ולחולל מתכונים מנצחים עם טוויסט.</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon berry-bg"><i class="fa-solid fa-book"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-recipes-count">0</h3>
+              <p>מתכונים בספר</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon apricot-bg"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-customers-count">0</h3>
+              <p>לקוחות רשומים</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon plum-bg"><i class="fa-solid fa-bolt"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-agent-scans">0</h3>
+              <p>סריקות סוכן שבוצעו</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-split">
+          <!-- Quick Recommendations & Matching -->
+          <div class="dashboard-panel">
+            <h3><i class="fa-solid fa-star text-gold"></i> התאמות מומלצות ללקוחות</h3>
+            <div class="scroll-panel" id="dashboard-matches">
+              <p class="placeholder-text">טוען התאמות...</p>
+            </div>
+          </div>
+
+          <!-- Latest Agent Suggestion -->
+          <div class="dashboard-panel">
+            <h3><i class="fa-solid fa-robot text-berry"></i> הצעה אחרונה מסוכן הטרנדים</h3>
+            <div class="latest-agent-box" id="dashboard-latest-agent">
+              <p class="placeholder-text">לא בוצעו סריקות עדיין.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CUSTOMERS TAB -->
+      <section id="customers-tab" class="tab-content">
+        <div class="section-header">
+          <h2>👥 ניהול לקוחות בוטיק</h2>
+          <button class="btn btn-primary" id="open-customer-modal-btn">
+            <i class="fa-solid fa-user-plus"></i> הוספת לקוח חדש
+          </button>
+        </div>
+
+        <div class="search-bar-container">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="customer-search-input" placeholder="חיפוש לקוח לפי שם, טלפון או העדפות פרי...">
+        </div>
+
+        <div class="customers-grid" id="customers-list">
+          <!-- Loaded via JS -->
+        </div>
+      </section>
+
+      <!-- RECIPES TAB -->
+      <section id="recipes-tab" class="tab-content">
+        <div class="section-header">
+          <h2>📖 ספר המתכונים השמור</h2>
+          <button class="btn btn-primary" id="open-recipe-modal-btn">
+            <i class="fa-solid fa-plus"></i> הוספת מתכון ידני
+          </button>
+        </div>
+
+        <div class="filters-row">
+          <div class="filter-group">
+            <label for="recipe-fruit-filter">סינון לפי פרי בסיס:</label>
+            <select id="recipe-fruit-filter">
+              <option value="all">הכל</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="recipe-sweetness-filter">רמת מתיקות:</label>
+            <select id="recipe-sweetness-filter">
+              <option value="all">הכל</option>
+              <option value="מתוק מאוד">מתוק מאוד</option>
+              <option value="מתיקות בינונית">מתיקות בינונית</option>
+              <option value="מתיקות מעודנת">מתיקות מעודנת</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="recipes-grid" id="recipes-list">
+          <!-- Loaded via JS -->
+        </div>
+      </section>
+
+      <!-- RECIPE GENERATOR TAB -->
+      <section id="generator-tab" class="tab-content">
+        <div class="welcome-banner generator-banner">
+          <h2>🧪 מחולל מתכונים יצירתי</h2>
+          <p>בחר פרי בסיס, רמת מתיקות וטוויסט, והבינה המלאכותית תייצר עבורך מתכון גורמה מפורט ומאוזן לחלוטין!</p>
+        </div>
+
+        <div class="generator-container">
+          <div class="generator-form-panel">
+            <h3>בחירת רכיבי הריבה</h3>
+            <form id="recipe-generator-form">
+              <div class="form-group">
+                <label for="gen-base-fruit">פרי הבסיס: <span class="required">*</span></label>
+                <input type="text" id="gen-base-fruit" placeholder="למשל: תות שדה, שזיף, אפרסק, תאנים..." required>
+              </div>
+
+              <div class="form-group">
+                <label for="gen-sweetness">רמת מתיקות מועדפת:</label>
+                <select id="gen-sweetness">
+                  <option value="מתיקות בינונית">מתיקות בינונית (מומלץ לריבות גורמה)</option>
+                  <option value="מתוק מאוד">מתוק מאוד (קלאסי)</option>
+                  <option value="מתיקות מעודנת">מתיקות מעודנת (חמצמץ ומעודן)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="gen-twist-type">סוג הטוויסט:</label>
+                <select id="gen-twist-type">
+                  <option value="herbal">עשבי תיבול (למשל: בזיליקום, רוזמרין, תימין)</option>
+                  <option value="spicy">תבלינים חמים (למשל: ג'ינג'ר, הל, צ'ילי, ציפורן)</option>
+                  <option value="alcoholic">אלכוהול משובח (למשל: יין אדום, וויסקי, אמרטו, קוניאק)</option>
+                  <option value="floral">פרחוני (למשל: לבנדר, מי ורדים, יסמין)</option>
+                  <option value="acidic">טוויסט חומצי (למשל: בלסמי מצומצם, גרידת ליים, חומץ תפוחים)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="gen-custom-notes">הערות מיוחדות או תוספות רצויות (אופציונלי):</label>
+                <textarea id="gen-custom-notes" rows="3" placeholder="למשל: 'אני רוצה להוסיף גם שקדים פרוסים' או 'מיועד לחג המולד עם שילוב תפוזים'"></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-secondary btn-block" id="generate-btn">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> חולל מתכון גורמה
+              </button>
+            </form>
+          </div>
+
+          <div class="generator-result-panel" id="generator-result-container">
+            <div class="result-placeholder">
+              <i class="fa-solid fa-mortar-pestle"></i>
+              <p>הזן פרטים מימין ולחץ על "חולל מתכון גורמה" כדי לראות את התוצאה כאן.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRODUCTION TOOLS TAB (New tab) -->
+      <section id="production-tab" class="tab-content">
+        <div class="section-header">
+          <h2>⚖️ כלי ייצור ועלויות</h2>
+        </div>
+
+        <div class="production-layout">
+          <!-- Right side: Config forms -->
+          <div class="prod-forms-container">
+            
+            <!-- Cost & Scale Form -->
+            <div class="prod-card">
+              <h3><i class="fa-solid fa-calculator text-berry"></i> מחשבון מנות ועלויות ייצור</h3>
+              <form id="prod-calculator-form">
+                <div class="form-group">
+                  <label for="prod-recipe-select">בחר מתכון בסיס:</label>
+                  <select id="prod-recipe-select" required>
+                    <option value="">-- בחר מתכון --</option>
+                  </select>
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="prod-jar-size">גודל צנצנת (גרם):</label>
+                    <input type="number" id="prod-jar-size" value="250" min="50" max="2000" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="prod-jar-count">כמות צנצנות יעד:</label>
+                    <input type="number" id="prod-jar-count" value="10" min="1" max="1000" required>
+                  </div>
+                </div>
+
+                <h4 class="prod-sub-heading">עלויות רכיבים גולמיים (₪)</h4>
+                
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="cost-fruit-kg">מחיר פרי (לק"ג):</label>
+                    <input type="number" id="cost-fruit-kg" value="15" min="0" step="0.5">
+                  </div>
+                  <div class="form-group">
+                    <label for="cost-sugar-kg">מחיר סוכר (לק"ג):</label>
+                    <input type="number" id="cost-sugar-kg" value="6" min="0" step="0.5">
+                  </div>
+                </div>
+
+                <div class="form-grid-3">
+                  <div class="form-group">
+                    <label for="cost-jar-unit">עלות צנצנת (ליח'):</label>
+                    <input type="number" id="cost-jar-unit" value="1.5" min="0" step="0.1">
+                  </div>
+                  <div class="form-group">
+                    <label for="cost-label-unit">עלות מדבקה (ליח'):</label>
+                    <input type="number" id="cost-label-unit" value="0.5" min="0" step="0.1">
+                  </div>
+                  <div class="form-group">
+                    <label for="cost-other-batch">הוצאות נוספות:</label>
+                    <input type="number" id="cost-other-batch" value="5" min="0" step="1" title="הוצאות אנרגיה, מים, פקטין וכד' לכל המנה">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="prod-markup">אחוז רווח מבוקש (%):</label>
+                  <input type="number" id="prod-markup" value="60" min="10" max="500">
+                </div>
+              </form>
+            </div>
+
+            <!-- Printable Label Configuration -->
+            <div class="prod-card" style="margin-top: 1.5rem;">
+              <h3><i class="fa-solid fa-tags text-apricot"></i> הגדרות תוויות מוצר</h3>
+              <form id="prod-label-form">
+                <div class="form-group">
+                  <label for="label-brand-name">שם מותג הבוטיק:</label>
+                  <input type="text" id="label-brand-name" value="ריבות הבוטיק שלי">
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="label-batch-code">קוד אצווה (Batch):</label>
+                    <input type="text" id="label-batch-code" placeholder="למשל: B-2026-001">
+                  </div>
+                  <div class="form-group">
+                    <label for="label-produce-date">תאריך ייצור:</label>
+                    <input type="date" id="label-produce-date">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="label-expiry-months">תוקף המוצר (חודשים):</label>
+                  <select id="label-expiry-months">
+                    <option value="12">12 חודשים (שנה)</option>
+                    <option value="6">6 חודשים</option>
+                    <option value="18">18 חודשים</option>
+                    <option value="24">24 חודשים (שנתיים)</option>
+                  </select>
+                </div>
+              </form>
+            </div>
+
+          </div>
+
+          <!-- Left side: Live outputs & Previews -->
+          <div class="prod-output-container">
+            
+            <!-- Scale & Costs Results -->
+            <div class="prod-card results-highlight">
+              <h3>📊 דוח ייצור ועלויות</h3>
+              <div id="calculator-results">
+                <p class="placeholder-text">בחר מתכון מימין כדי לחשב כמויות ועלויות.</p>
+              </div>
+            </div>
+
+            <!-- Product Label Preview -->
+            <div class="prod-card">
+              <div class="card-header" style="border-bottom:none; margin-bottom:0.5rem; padding-bottom:0;">
+                <h3>🖼️ תצוגה מקדימה של התווית</h3>
+                <button class="btn btn-secondary" id="print-label-btn" disabled>
+                  <i class="fa-solid fa-print"></i> הדפס תוויות
+                </button>
+              </div>
+              <div class="label-preview-wrapper" id="label-preview-container">
+                <p class="placeholder-text">בחר מתכון כדי לעצב את מדבקת הצנצנת.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- AI AGENT TAB -->
+      <section id="agent-tab" class="tab-content">
+        <div class="agent-hero-banner">
+          <div class="agent-hero-content">
+            <h2><i class="fa-solid fa-robot"></i> סוכן הטרנדים האוטומטי</h2>
+            <p>הסוכן סורק את האינטרנט, מזהה שילובים חמים בשווקים בינלאומיים ומייצר מתכונים יצירתיים עם טוויסט קולינרי ייחודי.</p>
+            <div class="agent-status-bar" id="agent-api-status">
+              <!-- Rendered via JS based on settings -->
+            </div>
+            <button class="btn btn-secondary btn-lg" id="trigger-scan-btn">
+              <i class="fa-solid fa-magnifying-glass-chart"></i> הפעל סוכן וסרוק טרנדים חיים בעולם
+            </button>
+          </div>
+        </div>
+
+        <!-- Agent Running / Loading State -->
+        <div class="agent-loading-container hidden" id="agent-loading">
+          <div class="spinner-container">
+            <div class="fruit-spinner">🍓</div>
+            <div class="spinner"></div>
+          </div>
+          <h3 id="agent-loading-status">הסוכן מתעורר לחיים...</h3>
+          <div class="agent-console" id="agent-console-logs">
+            <!-- Populated by JS to simulate scan steps -->
+          </div>
+        </div>
+
+        <!-- Agent Results -->
+        <div class="agent-results-container" id="agent-results-box">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- History Scans -->
+        <div class="agent-history-section">
+          <h3><i class="fa-solid fa-history"></i> היסטוריית סריקות קודמות</h3>
+          <div class="agent-history-list" id="agent-history-list">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS TAB -->
+      <section id="settings-tab" class="tab-content">
+        <div class="settings-card">
+          <h2>⚙️ הגדרות מערכת</h2>
+          <p class="settings-description">הגדר את החיבור לבינה המלאכותית על מנת להפעיל את סוכן הטרנדים האוטומטי ומחולל המתכונים החי.</p>
+
+          <form id="settings-form">
+            <div class="form-group">
+              <label for="gemini-api-key-input">מפתח Gemini API Key: <span class="required">*</span></label>
+              <div class="input-password-wrapper">
+                <input type="password" id="gemini-api-key-input" placeholder="הכנס את מפתח ה-API שלך (AI Studio)">
+                <button type="button" class="btn-toggle-password" id="toggle-key-visibility">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+              <p class="help-text">
+                מפתח ה-API נדרש לצורך פנייה ל-Gemini. המפתח יישמר בבסיס הנתונים המקומי בשרת שלך.
+                <br>
+                ניתן להשיג מפתח בחינם בפורטל <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">Google AI Studio <i class="fa-solid fa-arrow-up-right-from-square"></i></a>.
+              </p>
+            </div>
+
+            <div class="settings-status-box" id="settings-status-message">
+              <!-- Status message -->
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-floppy-disk"></i> שמור הגדרות
+            </button>
+          </form>
+        </div>
+
+        <div class="settings-card developer-card">
+          <h3>מידע על המערכת</h3>
+          <div class="info-table">
+            <div class="info-row">
+              <span class="info-label">שרת מארח:</span>
+              <span class="info-value">Node.js Express (Localhost)</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">בסיס נתונים:</span>
+              <span class="info-value">data/db.json (File-based JSON)</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">גרסת סוכן:</span>
+              <span class="info-value">Gemini 2.5 Flash with Google Search Grounding</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- CUSTOMER MODAL (Add/Edit Customer) -->
+  <div class="modal-overlay" id="customer-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="customer-modal-title">הוספת לקוח חדש</h3>
+        <button class="close-modal-btn" id="close-customer-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="customer-form">
+        <input type="hidden" id="customer-id-input">
+        
+        <div class="form-group">
+          <label for="cust-name">שם מלא: <span class="required">*</span></label>
+          <input type="text" id="cust-name" required placeholder="למשל: ישראל ישראלי">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="cust-phone">מספר טלפון: <span class="required">*</span></label>
+            <input type="tel" id="cust-phone" required placeholder="למשל: 050-1234567">
+          </div>
+          <div class="form-group">
+            <label for="cust-email">אימייל (אופציונלי):</label>
+            <input type="email" id="cust-email" placeholder="email@example.com">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>פירות מועדפים (בחר פירות מפתח או הקלד פירות נוספים מופרדים בפסיקים):</label>
+          <div class="fruit-chips-selector">
+            <span class="fruit-chip" data-fruit="תות שדה">🍓 תות שדה</span>
+            <span class="fruit-chip" data-fruit="משמש">🍑 משמש</span>
+            <span class="fruit-chip" data-fruit="תאנים">🍇 תאנים</span>
+            <span class="fruit-chip" data-fruit="תפוז">🍊 תפוז</span>
+            <span class="fruit-chip" data-fruit="אפרסק">🍑 אפרסק</span>
+            <span class="fruit-chip" data-fruit="שזיף">🍒 שזיף</span>
+            <span class="fruit-chip" data-fruit="דובדבן">🍒 דובדבן</span>
+          </div>
+          <input type="text" id="cust-fruits-input" placeholder="פירות מועדפים נוספים (מופרדים בפסיק)...">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="cust-sweetness">רמת מתיקות מועדפת:</label>
+            <select id="cust-sweetness">
+              <option value="מתיקות בינונית">מתיקות בינונית</option>
+              <option value="מתוק מאוד">מתוק מאוד</option>
+              <option value="מתיקות מעודנת">מתיקות מעודנת</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cust-allergies">רגישויות / אלרגיות (מופרד בפסיק, אופציונלי):</label>
+            <input type="text" id="cust-allergies" placeholder="למשל: אגוזים, גלוטן, לקטוז">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cust-notes">הערות נוספות והעדפות אישיות:</label>
+          <textarea id="cust-notes" rows="3" placeholder="רשום הערות מיוחדות, ימי הולדת, העדפות אריזה ועוד..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-text" id="cancel-customer-btn">ביטול</button>
+          <button type="submit" class="btn btn-primary">שמור לקוח</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- RECIPE DETAILS & EDIT MODAL -->
+  <div class="modal-overlay" id="recipe-modal">
+    <div class="modal-card recipe-modal-card">
+      <div class="modal-header">
+        <h3 id="recipe-modal-title">פרטי מתכון</h3>
+        <button class="close-modal-btn" id="close-recipe-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="recipe-form">
+        <input type="hidden" id="recipe-id-input">
+        
+        <div class="form-group">
+          <label for="rec-name">שם המתכון: <span class="required">*</span></label>
+          <input type="text" id="rec-name" required placeholder="למשל: ריבת תות קלאסית עם וניל">
+        </div>
+
+        <div class="form-group">
+          <label for="rec-description">תיאור קצר:</label>
+          <textarea id="rec-description" rows="2" placeholder="תיאור מפתה של הריבה..."></textarea>
+        </div>
+
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label for="rec-base-fruit">פרי בסיס: <span class="required">*</span></label>
+            <input type="text" id="rec-base-fruit" required placeholder="תות שדה, שזיף...">
+          </div>
+          <div class="form-group">
+            <label for="rec-sweetness">רמת מתיקות:</label>
+            <select id="rec-sweetness">
+              <option value="מתיקות בינונית">מתיקות בינונית</option>
+              <option value="מתוק מאוד">מתוק מאוד</option>
+              <option value="מתיקות מעודנת">מתיקות מעודנת</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="rec-cook-time">זמן בישול:</label>
+            <input type="text" id="rec-cook-time" placeholder="45 דקות">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="rec-twist">הטוויסט המיוחד:</label>
+          <input type="text" id="rec-twist" placeholder="למשל: צ'ילי חריף, וויסקי, בזיליקום">
+        </div>
+
+        <div class="form-group">
+          <label for="rec-ingredients">רכיבים (כל רכיב בשורה נפרדת): <span class="required">*</span></label>
+          <textarea id="rec-ingredients" rows="5" required placeholder="1 ק&quot;ג תות שדה&#10;700 גרם סוכר&#10;מיץ מחצי לימון"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="rec-instructions">הוראות הכנה (כל שלב בשורה נפרדת): <span class="required">*</span></label>
+          <textarea id="rec-instructions" rows="6" required placeholder="שלב 1: שוטפים ומנקים את הפרי.&#10;שלב 2: שמים בסיר עם הסוכר..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-text" id="cancel-recipe-btn">ביטול</button>
+          <button type="submit" class="btn btn-primary" id="save-recipe-submit-btn">שמור מתכון</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MATCHES VIEW MODAL -->
+  <div class="modal-overlay" id="match-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>התאמת ריבה אישית ללקוח</h3>
+        <button class="close-modal-btn" id="close-match-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="match-modal-body">
+        <!-- Rendered via JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="close-match-btn">סגור</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINT PAGE CONTENT (Hidden in normal screen, visible in print) -->
+  <div id="print-labels-container" class="print-only">
+    <!-- Rendered via JS for print -->
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
