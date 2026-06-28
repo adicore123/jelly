@@ -61,11 +61,16 @@ app.post('/api/customers', async (req, res) => {
 app.delete('/api/customers/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(`[API] Deleting customer request received for ID: ${id}`);
     let customers = await db.getCustomers();
+    const originalCount = customers.length;
     customers = customers.filter(c => c.id !== id);
+    console.log(`[API] Filtering complete. Original count: ${originalCount}, New count: ${customers.length}`);
     await db.saveCustomers(customers);
+    console.log(`[API] Save complete. Customer deleted successfully.`);
     res.json({ success: true });
   } catch (error) {
+    console.error(`[API] Delete customer error for ID ${req.params.id}:`, error);
     res.status(500).json({ error: error.message });
   }
 });
