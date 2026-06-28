@@ -3,16 +3,21 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const uri = process.env.MONGODB_URI;
-if (!uri) {
-  throw new Error("MONGODB_URI is not defined in the environment variables!");
-}
-
-const client = new MongoClient(uri);
+let client = null;
 let dbInstance = null;
 
 async function getDb() {
   if (dbInstance) return dbInstance;
+  
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error("MONGODB_URI is not defined in the environment variables!");
+  }
+  
+  if (!client) {
+    client = new MongoClient(uri);
+  }
+  
   await client.connect();
   dbInstance = client.db('ribamanager');
   return dbInstance;
