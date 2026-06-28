@@ -15,7 +15,8 @@ const MASTER_SITES = [
   { name: "קרוטית (אפרת ליכטנשטט)", url: "https://www.krutit.co.il", category: "ישראלי", feedUrl: "https://www.krutit.co.il/feed/" },
   { name: "בצק אלים", url: "https://www.bazekalim.com", category: "ישראלי", feedUrl: "https://www.bazekalim.com/feed/" },
   { name: "מתכונים ב-10 דקות", url: "https://www.10dakot.co.il", category: "ישראלי", feedUrl: "https://www.10dakot.co.il/feed/" },
-  // 🌍 International leading magazines (English)
+  
+  // 🌍 International magazines and multilingual blogs
   { name: "Serious Eats", url: "https://www.seriouseats.com", category: "בינלאומי", feedUrl: "https://www.seriouseats.com/feed" },
   { name: "Food52", url: "https://food52.com", category: "בינלאומי", feedUrl: "https://food52.com/blog.rss" },
   { name: "Epicurious", url: "https://www.epicurious.com", category: "בינלאומי", feedUrl: "https://www.epicurious.com/feed/recipes/rss" },
@@ -25,6 +26,25 @@ const MASTER_SITES = [
   { name: "Allrecipes", url: "https://www.allrecipes.com", category: "בינלאומי", feedUrl: "https://www.allrecipes.com/feed/" },
   { name: "King Arthur Baking", url: "https://www.kingarthurbaking.com", category: "בינלאומי", feedUrl: "https://www.kingarthurbaking.com/blog/feed" },
   { name: "Bon Appétit", url: "https://www.bonappetit.com", category: "בינלאומי", feedUrl: "https://www.bonappetit.com/feed/rss" },
+  // French blogs
+  { name: "Marmiton (צרפת)", url: "https://www.marmiton.org", category: "בינלאומי", feedUrl: "https://www.marmiton.org/rss/recettes.xml" },
+  { name: "Papilles et Pupilles (צרפת)", url: "https://www.papillesetpupilles.fr", category: "בינלאומי", feedUrl: "https://www.papillesetpupilles.fr/feed" },
+  // Spanish blogs
+  { name: "Directo al Paladar (ספרד)", url: "https://www.directoalpaladar.com", category: "בינלאומי", feedUrl: "https://www.directoalpaladar.com/feed" },
+  { name: "El Comidista (ספרד)", url: "https://elcomidista.elpais.com", category: "בינלאומי", feedUrl: "https://elcomidista.elpais.com/rss/elcomidista/rss.xml" },
+  // Italian blogs
+  { name: "Giallo Zafferano (איטליה)", url: "https://www.giallozafferano.it", category: "בינלאומי", feedUrl: "https://www.giallozafferano.it/feed/" },
+  { name: "Fatto in Casa da Benedetta (איטליה)", url: "https://www.fattoincasadabenedetta.it", category: "בינלאומי", feedUrl: "https://www.fattoincasadabenedetta.it/feed/" },
+  // German blogs
+  { name: "Chefkoch (גרמניה)", url: "https://www.chefkoch.de", category: "בינלאומי", feedUrl: "https://www.chefkoch.de/rss/rezepte/" },
+  { name: "Esen & Trinken (גרמניה)", url: "https://www.essen-und-trinken.de", category: "בינלאומי", feedUrl: "https://www.essen-und-trinken.de/feed/" },
+  // Russian blogs
+  { name: "Gastronom (רוסיה)", url: "https://www.gastronom.ru", category: "בינלאומי", feedUrl: "https://www.gastronom.ru/rss" },
+  { name: "Eda.ru (רוסיה)", url: "https://eda.ru", category: "בינלאומי", feedUrl: "https://eda.ru/rss" },
+  // Portuguese blogs
+  { name: "TudoGostoso (ברזיל)", url: "https://www.tudogostoso.com.br", category: "בינלאומי", feedUrl: "https://www.tudogostoso.com.br/feed" },
+  { name: "Panelaterapia (ברזיל)", url: "https://www.panelaterapia.com", category: "בינלאומי", feedUrl: "https://www.panelaterapia.com/feed" },
+
   // 🔬 Science, safety, technique & preserving manufacturers
   { name: "Ball Mason Jars (Fresh Preserving)", url: "https://www.ballmasonjars.com", category: "מדע ושימור", feedUrl: null },
   { name: "NCHFP", url: "https://nchfp.uga.edu", category: "מדע ושימור", feedUrl: null },
@@ -32,6 +52,7 @@ const MASTER_SITES = [
   { name: "Bernardin", url: "https://www.bernardin.ca", category: "מדע ושימור", feedUrl: null },
   { name: "Simply Canning", url: "https://www.simplycanning.com", category: "מדע ושימור", feedUrl: "https://www.simplycanning.com/feed/" },
   { name: "Le Parfait", url: "https://www.leparfait.com", category: "מדע ושימור", feedUrl: null },
+
   // 👨‍🍳 Chefs, artisans & creative culinary
   { name: "Food in Jars", url: "https://foodinjars.com", category: "שפים וארטיזנים", feedUrl: "https://foodinjars.com/feed/" },
   { name: "David Lebovitz", url: "https://www.davidlebovitz.com", category: "שפים וארטיזנים", feedUrl: "https://www.davidlebovitz.com/feed/" },
@@ -39,6 +60,7 @@ const MASTER_SITES = [
   { name: "Tangerine Zest", url: "https://tangerinezest.com", category: "שפים וארטיזנים", feedUrl: "https://tangerinezest.com/feed/" },
   { name: "Hilda's Kitchen Blog", url: "https://hildaskitchenblog.com", category: "שפים וארטיזנים", feedUrl: "https://hildaskitchenblog.com/feed/" },
   { name: "Fab Food 4 All", url: "https://www.fabfood4all.co.uk", category: "שפים וארטיזנים", feedUrl: "https://www.fabfood4all.co.uk/feed/" },
+
   // 🌿 Foraging, fermentation, homesteading & aggregators
   { name: "Practical Self Reliance", url: "https://practicalselfreliance.com", category: "ליקוט והתססה", feedUrl: "https://practicalselfreliance.com/feed/" },
   { name: "Grow Forage Cook Ferment", url: "https://www.growforagecookferment.com", category: "ליקוט והתססה", feedUrl: "https://www.growforagecookferment.com/feed/" },
@@ -48,7 +70,13 @@ const MASTER_SITES = [
   { name: "Attainable Sustainable", url: "https://www.attainable-sustainable.net", category: "ליקוט והתססה", feedUrl: "https://www.attainable-sustainable.net/feed/" },
   { name: "Homestead and Chill", url: "https://homesteadandchill.com", category: "ליקוט והתססה", feedUrl: "https://homesteadandchill.com/feed/" },
   { name: "Rural Sprout", url: "https://www.ruralsprout.com", category: "ליקוט והתססה", feedUrl: "https://www.ruralsprout.com/feed/" },
-  { name: "The Prairie Homestead", url: "https://www.theprairiehomestead.com", category: "ליקוט והתססה", feedUrl: "https://www.theprairiehomestead.com/feed/" }
+  { name: "The Prairie Homestead", url: "https://www.theprairiehomestead.com", category: "ליקוט והתססה", feedUrl: "https://www.theprairiehomestead.com/feed/" },
+
+  // 💬 Forums & Web Communities
+  { name: "Reddit r/canning (קהילה)", url: "https://www.reddit.com/r/canning", category: "פורומים וקהילות", feedUrl: "https://www.reddit.com/r/canning.rss" },
+  { name: "Reddit r/Preserving (קהילה)", url: "https://www.reddit.com/r/Preserving", category: "פורומים וקהילות", feedUrl: "https://www.reddit.com/r/Preserving.rss" },
+  { name: "Reddit r/foraging (קהילה)", url: "https://www.reddit.com/r/foraging", category: "פורומים וקהילות", feedUrl: "https://www.reddit.com/r/foraging.rss" },
+  { name: "Reddit r/jam (קהילה)", url: "https://www.reddit.com/r/jam", category: "פורומים וקהילות", feedUrl: "https://www.reddit.com/r/jam.rss" }
 ];
 
 // Keywords to check if a title is relevant to fruit, jams, spreads, canning, or preserving
@@ -65,7 +93,27 @@ const RELEVANT_KEYWORDS = [
   'צנצנת', 'צנצנות', 'תות', 'תותים', 'משמש', 'משמשים', 'אפרסק', 'אפרסקים', 'שזיף', 'שזיפים', 
   'תאנים', 'תאנה', 'תפוז', 'תפוזים', 'לימון', 'לימונים', 'קלמנטינה', 'אשכולית', 'פרי הדר', 
   'מנדרינה', 'פירות יער', 'דובדבן', 'דובדבנים', 'אוכמניות', 'אוכמניה', 'פטל', 'חמוציות', 
-  'פקטין', 'סירופ', 'קומפוט', 'מרמלדה', 'ממרח', 'ממרחים'
+  'פקטין', 'סירופ', 'קומפוט', 'מרמלדה', 'ממרח', 'ממרחים',
+  // French keywords
+  'confiture', 'confitures', 'gelée', 'gelées', 'conserve', 'conserves', 'marmelade', 'fraise', 
+  'abricot', 'pêche', 'prune', 'figue', 'citron', 'bocaux', 'sirop',
+  // Spanish keywords
+  'mermelada', 'mermeladas', 'jalea', 'fresa', 'albaricoque', 'melocotón', 'ciruela', 'higo', 
+  'naranja', 'limón', 'tarro', 'tarros', 'almíbar', 'compota',
+  // Italian keywords
+  'marmellata', 'marmellate', 'confettura', 'confetture', 'gelatina', 'fragola', 'albicocca', 
+  'pesca', 'prugna', 'fico', 'arancia', 'barattolo', 'barattoli', 'sciroppo', 'composta',
+  // German keywords
+  'konfitüre', 'konfitüren', 'einkochen', 'einmachen', 'gelee', 'erdbeere', 'aprikose', 'pfirsich', 
+  'pflaume', 'feige', 'zitrone', 'glas', 'gläser', 'sirup', 'kompott',
+  // Russian keywords
+  'варенье', 'джем', 'повидло', 'консервация', 'ягоды', 'клубника', 'абрикос', 'персик', 
+  'слива', 'инжир', 'апельсин', 'банка', 'банки',
+  // Portuguese keywords
+  'geleia', 'geleias', 'compota', 'compotas', 'doce', 'doces', 'morango', 'pêssego', 'ameixa', 
+  'figo', 'pote', 'potes', 'xarope',
+  // Arabic keywords
+  'مربى', 'مربيات', 'تعليب', 'فواكه', 'فراولة', 'مشمش', 'خوخ', 'برقوق', 'تين', 'برتقال'
 ];
 
 function isTitleRelevant(title, siteCategory) {
@@ -147,23 +195,129 @@ async function crawlMasterFeeds() {
   return { allResults, successfulFeeds, totalTitles };
 }
 
-// Build a context string from crawl results to inject into the AI prompt
-function buildCrawlContext(crawlData) {
-  if (!crawlData.successfulFeeds || crawlData.successfulFeeds.length === 0) {
-    return "לא התקבלו פידים חיים מהאתרים. השתמש בידע המובנה שלך על 40 האתרים ברשימת המאסטר.";
+// Build a context string from crawl and search results to inject into the AI prompt
+function buildCrawlAndSearchContext(crawlData, searchResults) {
+  let context = "";
+  
+  if (crawlData.successfulFeeds && crawlData.successfulFeeds.length > 0) {
+    context += `=== 📰 כותרות טריות מ-40 אתרי המאסטר ===\n`;
+    for (const feed of crawlData.successfulFeeds) {
+      context += `📌 ${feed.site} (${feed.category}) — ${feed.url}\n`;
+      for (const title of feed.titles) {
+        context += `   • ${title}\n`;
+      }
+      context += '\n';
+    }
+  } else {
+    context += "לא התקבלו פידים חיים מ-40 אתרי המאסטר.\n\n";
   }
   
-  let context = `נסרקו ${crawlData.successfulFeeds.length} אתרים בהצלחה ונמצאו ${crawlData.totalTitles} כותרות טריות:\n\n`;
-  
-  for (const feed of crawlData.successfulFeeds) {
-    context += `📌 ${feed.site} (${feed.category}) — ${feed.url}\n`;
-    for (const title of feed.titles) {
-      context += `   • ${title}\n`;
+  if (searchResults && searchResults.length > 0) {
+    context += `=== 💬 דיונים וטרנדים חיים מפורומים ו-Reddit (Deep Research) ===\n`;
+    for (const hit of searchResults) {
+      context += `🔗 [${hit.title}] (${hit.url})\n`;
+      context += `   💬 תקציר הדיון: ${hit.snippet}\n\n`;
     }
-    context += '\n';
+  } else {
+    context += "לא נמצאו דיונים קהילתיים חדשים ברשת.\n";
   }
   
   return context;
+}
+
+// ============================================================
+// 🔍 DEEP RESEARCH ENGINE — Searches Reddit & culinary forums via DuckDuckGo HTML
+// ============================================================
+async function fetchSingleSearch(query) {
+  const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+      }
+    });
+    clearTimeout(timeout);
+    
+    if (!response.ok) {
+      return [];
+    }
+    
+    const htmlText = await response.text();
+    const results = [];
+    
+    // Simple regex parsing of DDG HTML results
+    const resultBlockRegex = /<div class="result[^"]*">([\s\S]*?)<\/div>\s*<\/div>/gi;
+    let match;
+    while ((match = resultBlockRegex.exec(htmlText)) !== null && results.length < 8) {
+      const block = match[1];
+      const titleMatch = block.match(/<a class="result__url"[^>]*>([\s\S]*?)<\/a>/i);
+      const snippetMatch = block.match(/<a class="result__snippet"[^>]*>([\s\S]*?)<\/a>/i);
+      const linkMatch = block.match(/href="([^"]+)"/i);
+      
+      if (snippetMatch) {
+        const cleanSnippet = snippetMatch[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+        const cleanTitle = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : "Forum Discussion";
+        const link = linkMatch ? linkMatch[1] : "#";
+        
+        // Only include if it contains relevant keywords to avoid noise
+        if (cleanSnippet && isTitleRelevant(cleanSnippet + " " + cleanTitle, "General")) {
+          results.push({
+            title: cleanTitle,
+            snippet: cleanSnippet,
+            url: link
+          });
+        }
+      }
+    }
+    
+    return results;
+  } catch (error) {
+    console.error(`[RibaManager DeepSearch] Error querying "${query}":`, error.message);
+    return [];
+  }
+}
+
+async function runDeepResearch() {
+  console.log("[RibaManager DeepSearch] Initiating web forum & Reddit search...");
+  const queries = [
+    "reddit canning jam gourmet flavor combinations",
+    "reddit preserves jelly recipe ideas",
+    "confiture maison fruits associations saveurs forum",
+    "receta mermelada casera maridaje foro",
+    "marmellata fatta in casa abbinamenti ricette forum",
+    "marmelade rezepte einkochen forum",
+    "домашнее варенье необычные рецепты форум",
+    "receita de geleia artesanal combinacoes forum",
+    "طريقة عمل مربى الفواكه في المنزل פורום"
+  ];
+  
+  const searchPromises = queries.map(q => fetchSingleSearch(q));
+  const resultsArray = await Promise.allSettled(searchPromises);
+  
+  const allHits = [];
+  for (const res of resultsArray) {
+    if (res.status === 'fulfilled') {
+      allHits.push(...res.value);
+    }
+  }
+  
+  // De-duplicate results by url or title
+  const seen = new Set();
+  const uniqueHits = [];
+  for (const hit of allHits) {
+    if (!seen.has(hit.url) && !seen.has(hit.title)) {
+      seen.add(hit.url);
+      seen.add(hit.title);
+      uniqueHits.push(hit);
+    }
+  }
+  
+  console.log(`[RibaManager DeepSearch] Deep research complete. Found ${uniqueHits.length} unique forum discussions.`);
+  return uniqueHits;
 }
 
 // ============================================================
@@ -651,25 +805,34 @@ export async function runAgentScan() {
     }
     
     try {
-      // Step 1: Crawl RSS feeds from 40 master sites
-      console.log("[RibaManager] Phase 1: Crawling 40 master sites...");
-      const crawlData = await crawlMasterFeeds();
-      const crawlContext = buildCrawlContext(crawlData);
+      // Step 1: Crawl RSS feeds from 40 master sites AND run Deep Research on Reddit/forums
+      console.log("[RibaManager] Phase 1: Crawling 40 master sites & executing Deep Research...");
+      const [crawlData, searchResults] = await Promise.all([
+        crawlMasterFeeds(),
+        runDeepResearch()
+      ]);
+      const crawlContext = buildCrawlAndSearchContext(crawlData, searchResults);
       
       // Step 2: Send crawled data to Groq for analysis
       console.log("[RibaManager] Phase 2: Analyzing with Groq AI...");
       const parsedResult = await callGroqScan(groqApiKey, crawlContext);
       
-      // Build sources list from successful feeds
-      const sources = crawlData.successfulFeeds.slice(0, 8).map(f => ({
-        title: f.site,
-        url: f.url
-      }));
+      // Build sources list from successful feeds and search results
+      const sources = [
+        ...crawlData.successfulFeeds.slice(0, 5).map(f => ({
+          title: f.site,
+          url: f.url
+        })),
+        ...searchResults.slice(0, 5).map(s => ({
+          title: `דיון: ${s.title.substring(0, 40)}...`,
+          url: s.url
+        }))
+      ];
       
       const agentLog = {
         id: 'l_' + Date.now(),
         timestamp: new Date().toISOString(),
-        query: `סריקת מאסטר חיה — ${crawlData.successfulFeeds.length} אתרים, ${crawlData.totalTitles} כותרות (Groq Llama 3.3 70B)`,
+        query: `סריקת מאסטר וקהילות רשת (Deep Research — ${crawlData.successfulFeeds.length} אתרים, ${searchResults.length} דיוני פורומים)`,
         summary: parsedResult.summary,
         suggestions: parsedResult.suggestions,
         sources: sources,

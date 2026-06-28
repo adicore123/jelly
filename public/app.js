@@ -1295,7 +1295,7 @@ function renderAgentTab() {
     const providerLabel = p === 'groq' ? 'Groq (Llama 3.3 70B) ⚡' : (p === 'openrouter' ? 'OpenRouter' : 'Gemini');
     statusBox.innerHTML = `
       <span class="status-indicator status-active"></span>
-      <span>סוכן AI מחובר דרך ${providerLabel} — סריקת 40 אתרים מופעלת!</span>
+      <span>סוכן AI מחובר דרך ${providerLabel} — סריקת 56 אתרים וקהילות רשת מופעלת!</span>
     `;
   } else {
     statusBox.innerHTML = `
@@ -1343,7 +1343,7 @@ async function loadMasterSitesGrid() {
   try {
     const res = await fetch(`${API_BASE}/api/agent/sites`);
     const sites = await res.json();
-    const categoryIcons = { 'ישראלי': '🇮🇱', 'בינלאומי': '🌍', 'מדע ושימור': '🔬', 'שפים וארטיזנים': '👨‍🍳', 'ליקוט והתססה': '🌿' };
+    const categoryIcons = { 'ישראלי': '🇮🇱', 'בינלאומי': '🌍', 'מדע ושימור': '🔬', 'שפים וארטיזנים': '👨‍🍳', 'ליקוט והתססה': '🌿', 'פורומים וקהילות': '💬' };
     grid.innerHTML = sites.map(s => `
       <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="master-site-chip">
         <span class="site-icon">${categoryIcons[s.category] || '🌐'}</span>
@@ -1378,9 +1378,13 @@ async function handleAgentScan() {
   appendConsole("בודק הגדרות מפתח API...");
   
   if (state.settings.hasKey && isGroq) {
-    appendConsole("⚡ מפתח Groq API נמצא. מפעיל סריקת 40 אתרי מאסטר...");
+    appendConsole("⚡ מפתח Groq API נמצא. מפעיל סריקת 56 אתרי מאסטר וקהילות רשת...");
     await new Promise(r => setTimeout(r, 500));
-    elements.agentLoadingStatus.innerText = "🔍 שלב 1: סורק פידים חיים מ-40 אתרי מאסטר...";
+    elements.agentLoadingStatus.innerText = "🔍 שלב 1: סורק פידים חיים מ-56 מקורות כולל Reddit...";
+    appendConsole("💬 מתחבר לקהילות Reddit (r/canning, r/Preserving, r/foraging, r/jam)...");
+    await new Promise(r => setTimeout(r, 400));
+    appendConsole("🌍 מתחבר לבלוגים רב-לשוניים בצרפתית, ספרדית, איטלקית, גרמנית, רוסית ופורטוגזית...");
+    await new Promise(r => setTimeout(r, 400));
     appendConsole("🇮🇱 מתחבר לפודי, השולחן, עוגיו.נט, קרוטית...");
     await new Promise(r => setTimeout(r, 400));
     appendConsole("🌍 מתחבר ל-Serious Eats, Food52, BBC Good Food...");
