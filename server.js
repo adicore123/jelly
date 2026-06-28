@@ -158,11 +158,23 @@ app.post('/api/agent/scan', async (req, res) => {
 app.get('/api/settings', async (req, res) => {
   try {
     const settings = await db.getSettings();
-    const hasEnvKey = !!process.env.GEMINI_API_KEY;
-    const hasDbKey = !!settings.geminiApiKey;
+    const hasEnvGeminiKey = !!process.env.GEMINI_API_KEY;
+    const hasDbGeminiKey = !!settings.geminiApiKey;
+    const hasEnvOpenRouterKey = !!process.env.OPENROUTER_API_KEY;
+    const hasDbOpenRouterKey = !!settings.openRouterApiKey;
+    
+    const aiProvider = settings.aiProvider || 'gemini';
+    const hasKey = aiProvider === 'openrouter' 
+      ? (hasEnvOpenRouterKey || hasDbOpenRouterKey)
+      : (hasEnvGeminiKey || hasDbGeminiKey);
+
     res.json({
-      hasKey: hasEnvKey || hasDbKey,
-      usingEnv: hasEnvKey
+      hasKey,
+      aiProvider,
+      hasGeminiKey: hasEnvGeminiKey || hasDbGeminiKey,
+      hasOpenRouterKey: hasEnvOpenRouterKey || hasDbOpenRouterKey,
+      usingEnvGemini: hasEnvGeminiKey,
+      usingEnvOpenRouter: hasEnvOpenRouterKey
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -171,9 +183,13 @@ app.get('/api/settings', async (req, res) => {
 
 app.post('/api/settings', async (req, res) => {
   try {
-    const { geminiApiKey } = req.body;
+    const { geminiApiKey, aiProvider, openRouterApiKey } = req.body;
     const settings = await db.getSettings();
-    settings.geminiApiKey = geminiApiKey;
+    
+    if (aiProvider !== undefined) settings.aiProvider = aiProvider;
+    if (geminiApiKey !== undefined) settings.geminiApiKey = geminiApiKey;
+    if (openRouterApiKey !== undefined) settings.openRouterApiKey = openRouterApiKey;
+    
     await db.saveSettings(settings);
     res.json({ success: true });
   } catch (error) {

@@ -13,7 +13,7 @@ async function readDb() {
     return JSON.parse(data);
   } catch (error) {
     // If error, return a default structure
-    const defaultDb = { customers: [], recipes: [], agent_logs: [], settings: { geminiApiKey: "" } };
+    const defaultDb = { customers: [], recipes: [], agent_logs: [], settings: { geminiApiKey: "", aiProvider: "gemini", openRouterApiKey: "" } };
     await writeDb(defaultDb);
     return defaultDb;
   }
@@ -67,7 +67,7 @@ export const db = {
   // Settings
   async getSettings() {
     const data = await readDb();
-    return data.settings || { geminiApiKey: "" };
+    return data.settings || { geminiApiKey: "", aiProvider: "gemini", openRouterApiKey: "" };
   },
 
   async saveSettings(settings) {

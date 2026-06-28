@@ -99,8 +99,13 @@ const elements = {
 
   // Settings
   settingsForm: document.getElementById('settings-form'),
+  aiProviderSelect: document.getElementById('ai-provider-select'),
+  geminiKeyGroup: document.getElementById('gemini-key-group'),
+  openRouterKeyGroup: document.getElementById('openrouter-key-group'),
   geminiApiKeyInput: document.getElementById('gemini-api-key-input'),
+  openRouterApiKeyInput: document.getElementById('openrouter-api-key-input'),
   toggleKeyVisibility: document.getElementById('toggle-key-visibility'),
+  toggleOpenRouterKeyVisibility: document.getElementById('toggle-openrouter-key-visibility'),
   settingsStatusMessage: document.getElementById('settings-status-message'),
 
   // Matches Modal
@@ -208,6 +213,23 @@ async function fetchAgentLogs() {
 async function fetchSettings() {
   const res = await fetch(`${API_BASE}/api/settings`);
   state.settings = await res.json();
+  
+  // Set values in elements
+  if (elements.aiProviderSelect) {
+    elements.aiProviderSelect.value = state.settings.aiProvider || 'gemini';
+    toggleSettingsFields();
+  }
+}
+
+function toggleSettingsFields() {
+  const provider = elements.aiProviderSelect.value;
+  if (provider === 'gemini') {
+    elements.geminiKeyGroup.classList.remove('hidden');
+    elements.openRouterKeyGroup.classList.add('hidden');
+  } else {
+    elements.geminiKeyGroup.classList.add('hidden');
+    elements.openRouterKeyGroup.classList.remove('hidden');
+  }
 }
 
 /* --- TOAST NOTIFICATIONS --- */
@@ -238,9 +260,10 @@ function updateSidebarStatus() {
   if (!sidebarStatus) return;
   
   if (state.settings.hasKey) {
+    const providerLabel = state.settings.aiProvider === 'openrouter' ? 'OpenRouter' : 'Gemini';
     sidebarStatus.innerHTML = `
       <span class="status-indicator status-active"></span>
-      <span>סוכן AI מחובר (סריקה חיה)</span>
+      <span>סוכן AI מחובר (${providerLabel})</span>
     `;
   } else {
     sidebarStatus.innerHTML = `
@@ -251,28 +274,48 @@ function updateSidebarStatus() {
 }
 
 /* --- SETTINGS HANDLERS --- */
+if (elements.aiProviderSelect) {
+  elements.aiProviderSelect.addEventListener('change', toggleSettingsFields);
+}
+
 elements.settingsForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const apiKey = elements.geminiApiKeyInput.value.trim();
   
-  if (!apiKey) {
+  const provider = elements.aiProviderSelect.value;
+  const geminiApiKey = elements.geminiApiKeyInput.value.trim();
+  const openRouterApiKey = elements.openRouterApiKeyInput.value.trim();
+  
+  // Validation
+  if (provider === 'gemini' && !geminiApiKey && !state.settings.hasGeminiKey) {
     elements.settingsStatusMessage.className = 'settings-status-box error';
-    elements.settingsStatusMessage.innerText = 'נא להזין מפתח תקין';
+    elements.settingsStatusMessage.innerText = 'נא להזין מפתח Gemini API תקין';
+    return;
+  }
+  if (provider === 'openrouter' && !openRouterApiKey && !state.settings.hasOpenRouterKey) {
+    elements.settingsStatusMessage.className = 'settings-status-box error';
+    elements.settingsStatusMessage.innerText = 'נא להזין מפתח OpenRouter API תקין';
     return;
   }
 
   try {
+    const body = { aiProvider: provider };
+    if (geminiApiKey) body.geminiApiKey = geminiApiKey;
+    if (openRouterApiKey) body.openRouterApiKey = openRouterApiKey;
+    
     const res = await fetch(`${API_BASE}/api/settings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ geminiApiKey: apiKey })
+      body: JSON.stringify(body)
     });
     
     if (res.ok) {
       elements.settingsStatusMessage.className = 'settings-status-box success';
       elements.settingsStatusMessage.innerText = 'ההגדרות נשמרו בהצלחה!';
-      showToast('מפתח API עודכן בשרת', 'success');
-      elements.geminiApiKeyInput.value = ''; // Clear input for security
+      showToast('הגדרות בינה מלאכותית עודכנו בשרת', 'success');
+      
+      elements.geminiApiKeyInput.value = '';
+      elements.openRouterApiKeyInput.value = '';
+      
       await fetchSettings();
       updateSidebarStatus();
       renderAgentTab();
@@ -289,6 +332,12 @@ elements.toggleKeyVisibility.addEventListener('click', () => {
   const type = elements.geminiApiKeyInput.type === 'password' ? 'text' : 'password';
   elements.geminiApiKeyInput.type = type;
   elements.toggleKeyVisibility.querySelector('i').className = type === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+});
+
+elements.toggleOpenRouterKeyVisibility.addEventListener('click', () => {
+  const type = elements.openRouterApiKeyInput.type === 'password' ? 'text' : 'password';
+  elements.openRouterApiKeyInput.type = type;
+  elements.toggleOpenRouterKeyVisibility.querySelector('i').className = type === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
 });
 
 /* --- CUSTOMERS HANDLERS --- */
@@ -1219,9 +1268,10 @@ function printLabels() {
 function renderAgentTab() {
   const statusBox = elements.agentApiStatus;
   if (state.settings.hasKey) {
+    const providerLabel = state.settings.aiProvider === 'openrouter' ? 'OpenRouter' : 'Gemini';
     statusBox.innerHTML = `
       <span class="status-indicator status-active"></span>
-      <span>סוכן AI מחובר ומפתח API תקין (סריקה חיה מופעלת)</span>
+      <span>סוכן AI מחובר דרך ${providerLabel} ומפתח API תקין (סריקה חיה מופעלת)</span>
     `;
   } else {
     statusBox.innerHTML = `
@@ -1280,10 +1330,16 @@ async function handleAgentScan() {
   appendConsole("בודק הגדרות מפתח API...");
   
   if (state.settings.hasKey) {
-    appendConsole("מפתח API נמצא. מכין סריקה חיה בעולם...");
+    const isOR = state.settings.aiProvider === 'openrouter';
+    appendConsole(`מפתח API נמצא. מכין סריקה חיה דרך ${isOR ? 'OpenRouter' : 'Gemini'}...`);
     await new Promise(r => setTimeout(r, 600));
-    appendConsole("מתחבר למנוע Google Search Grounding...");
-    elements.agentLoadingStatus.innerText = "סורק טרנדים קולינריים ברשת...";
+    if (isOR) {
+      appendConsole("מתחבר למודל ה-AI החינמי Llama 3 8B...");
+      elements.agentLoadingStatus.innerText = "הסוכן מנתח ידע קולינרי עולמי...";
+    } else {
+      appendConsole("מתחבר למנוע Google Search Grounding...");
+      elements.agentLoadingStatus.innerText = "סורק טרנדים קולינריים ברשת...";
+    }
   } else {
     appendConsole("לא נמצא מפתח API. מפעיל מנגנון סריקה מקומי (אופליין)...");
     await new Promise(r => setTimeout(r, 1000));
@@ -1295,7 +1351,7 @@ async function handleAgentScan() {
   appendConsole("מנתח בלוגים קולינריים מובילים ומחירי שוק בלונדון, פריז וטוקיו...");
   
   if (state.settings.hasKey) {
-    elements.agentLoadingStatus.innerText = "מנתח תוצאות חיפוש ומפיק מתכונים עם טוויסט...";
+    elements.agentLoadingStatus.innerText = "מנתח תוצאות ומפיק מתכונים עם טוויסט...";
   }
   
   try {
