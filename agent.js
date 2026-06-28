@@ -116,7 +116,7 @@ export async function runAgentScan() {
   try {
     console.log("Starting live agent trend scan using Gemini API...");
     
-    const url = `https://generativetoolcenter.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
     
     const prompt = `
       Scan the web and find the latest (2025/2026) artisanal jam and fruit preserves trends.
@@ -250,7 +250,7 @@ export async function generateCustomRecipe(baseFruit, sweetness, twistType, note
   }
 
   try {
-    const url = `https://generativetoolcenter.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
     
     const prompt = `
       Create a unique, high-quality, artisanal gourmet jam recipe in Hebrew based on these parameters:
