@@ -1330,6 +1330,11 @@ function displayAgentScanResult(log) {
   const box = elements.agentResultsBox;
   box.style.display = 'block';
   
+  // Ensure this log is available in state for index retrieval
+  if (!state.agentLogs.some(l => l.id === log.id)) {
+    state.agentLogs.unshift(log);
+  }
+  
   const sourcesHtml = log.sources.map(s => `
     <span class="source-chip">
       <i class="fa-solid fa-link"></i> 
@@ -1370,7 +1375,7 @@ function displayAgentScanResult(log) {
           <p style="font-size:0.8rem; color:var(--text-muted);"><i class="fa-solid fa-clock"></i> זמן בישול: ${recipe.cookTime || '45 דקות'}</p>
         </div>
 
-        <button class="btn btn-primary btn-block" style="margin-top:0.8rem;" onclick='adoptAgentRecipe(${JSON.stringify(recipe).replace(/'/g, "&apos;")})'>
+        <button class="btn btn-primary btn-block" style="margin-top:0.8rem;" onclick="adoptAgentRecipeByIndex('${log.id}', ${idx})">
           <i class="fa-solid fa-plus-circle"></i> ✨ אמץ מתכון זה לספר שלי
         </button>
       </div>
@@ -1433,6 +1438,20 @@ window.adoptAgentRecipe = async (recipe) => {
   } catch (e) {
     showToast(e.message, 'error');
   }
+};
+
+window.adoptAgentRecipeByIndex = async (logId, idx) => {
+  const log = state.agentLogs.find(l => l.id === logId);
+  if (!log) {
+    showToast('יומן סריקה לא נמצא', 'error');
+    return;
+  }
+  const recipe = log.suggestions[idx];
+  if (!recipe) {
+    showToast('מתכון לא נמצא ביומן', 'error');
+    return;
+  }
+  await window.adoptAgentRecipe(recipe);
 };
 
 /* --- DASHBOARD RENDER --- */
