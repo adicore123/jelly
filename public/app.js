@@ -238,6 +238,37 @@ function toggleSettingsFields() {
   }
 }
 
+/* --- CUSTOM CONFIRM MODAL --- */
+function confirmAction(message, onConfirm) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay active';
+  overlay.style.zIndex = '9999';
+  
+  const card = document.createElement('div');
+  card.className = 'modal-card';
+  card.style.maxWidth = '400px';
+  card.style.textAlign = 'center';
+  card.style.padding = '2rem';
+  
+  card.innerHTML = `
+    <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: var(--danger); margin-bottom: 1rem;"></i>
+    <h3 style="margin-bottom: 1rem; color: var(--text-dark); font-weight: 700;">${message}</h3>
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
+      <button class="btn btn-text" id="custom-confirm-cancel">ביטול</button>
+      <button class="btn btn-danger" id="custom-confirm-ok">אישור מחיקה</button>
+    </div>
+  `;
+  
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+  
+  document.getElementById('custom-confirm-cancel').onclick = () => overlay.remove();
+  document.getElementById('custom-confirm-ok').onclick = () => {
+    overlay.remove();
+    onConfirm();
+  };
+}
+
 /* --- TOAST NOTIFICATIONS --- */
 function showToast(message, type = 'info') {
   const toast = document.createElement('div');
@@ -545,25 +576,25 @@ async function handleCustomerFormSubmit(e) {
 }
 
 async function deleteCustomer(id) {
-  if (!confirm('האם אתה בטוח שברצונך למחוק לקוח זה?')) return;
-  
-  try {
-    const res = await fetch(`${API_BASE}/api/customers/${id}`, {
-      method: 'DELETE'
-    });
-    
-    if (res.ok) {
-      showToast('הלקוח נמחק בהצלחה', 'success');
-      await fetchCustomers();
-      renderCustomers();
-      renderDashboard();
-    } else {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || 'שגיאה במחיקת הלקוח');
+  confirmAction('האם אתה בטוח שברצונך למחוק לקוח זה?', async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/customers/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (res.ok) {
+        showToast('הלקוח נמחק בהצלחה', 'success');
+        await fetchCustomers();
+        renderCustomers();
+        renderDashboard();
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'שגיאה במחיקת הלקוח');
+      }
+    } catch (error) {
+      showToast(error.message, 'error');
     }
-  } catch (error) {
-    showToast(error.message, 'error');
-  }
+  });
 }
 
 function renderCustomers() {
@@ -832,26 +863,26 @@ async function handleRecipeFormSubmit(e) {
 }
 
 async function deleteRecipe(id) {
-  if (!confirm('האם אתה בטוח שברצונך למחוק מתכון זה?')) return;
-  
-  try {
-    const res = await fetch(`${API_BASE}/api/recipes/${id}`, {
-      method: 'DELETE'
-    });
-    
-    if (res.ok) {
-      showToast('המתכון נמחק', 'success');
-      await fetchRecipes();
-      populateRecipeFilters();
-      populateProductionRecipes();
-      renderRecipes();
-      renderDashboard();
-    } else {
-      throw new Error('שגיאה במחיקת המתכון');
+  confirmAction('האם אתה בטוח שברצונך למחוק מתכון זה?', async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/recipes/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (res.ok) {
+        showToast('המתכון נמחק', 'success');
+        await fetchRecipes();
+        populateRecipeFilters();
+        populateProductionRecipes();
+        renderRecipes();
+        renderDashboard();
+      } else {
+        throw new Error('שגיאה במחיקת המתכון');
+      }
+    } catch (error) {
+      showToast(error.message, 'error');
     }
-  } catch (error) {
-    showToast(error.message, 'error');
-  }
+  });
 }
 
 function renderRecipes() {
