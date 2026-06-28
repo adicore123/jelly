@@ -1,79 +1,95 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { MongoClient } from 'mongodb';
+import dotenv from 'dotenv';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const DB_PATH = path.join(__dirname, 'data', 'db.json');
+dotenv.config();
 
-// Helper to ensure database is loaded and valid
-async function readDb() {
-  try {
-    const data = await fs.readFile(DB_PATH, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    // If error, return a default structure
-    const defaultDb = { customers: [], recipes: [], agent_logs: [], settings: { geminiApiKey: "", aiProvider: "groq", openRouterApiKey: "", groqApiKey: "" } };
-    await writeDb(defaultDb);
-    return defaultDb;
-  }
+const uri = process.env.MONGODB_URI;
+if (!uri) {
+  throw new Error("MONGODB_URI is not defined in the environment variables!");
 }
 
-async function writeDb(data) {
-  await fs.mkdir(path.dirname(DB_PATH), { recursive: true });
-  await fs.writeFile(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
+const client = new MongoClient(uri);
+let dbInstance = null;
+
+async function getDb() {
+  if (dbInstance) return dbInstance;
+  await client.connect();
+  dbInstance = client.db('ribamanager');
+  return dbInstance;
 }
 
 export const db = {
   // Customers CRUD
   async getCustomers() {
-    const data = await readDb();
-    return data.customers || [];
+    const database = await getDb();
+    const customers = await database.collection('customers').find({}).toArray();
+    return customers.map(({ _id, ...rest }) => rest);
   },
 
   async saveCustomers(customers) {
-    const data = await readDb();
-    data.customers = customers;
-    await writeDb(data);
+    const database = await getDb();
+    const col = database.collection('customers');
+    await col.deleteMany({});
+    if (customers.length > 0) {
+      const cleanCustomers = customers.map(({ _id, ...rest }) => rest);
+      await col.insertMany(cleanCustomers);
+    }
     return customers;
   },
 
   // Recipes CRUD
   async getRecipes() {
-    const data = await readDb();
-    return data.recipes || [];
+    const database = await getDb();
+    const recipes = await database.collection('recipes').find({}).toArray();
+    return recipes.map(({ _id, ...rest }) => rest);
   },
 
   async saveRecipes(recipes) {
-    const data = await readDb();
-    data.recipes = recipes;
-    await writeDb(data);
+    const database = await getDb();
+    const col = database.collection('recipes');
+    await col.deleteMany({});
+    if (recipes.length > 0) {
+      const cleanRecipes = recipes.map(({ _id, ...rest }) => rest);
+      await col.insertMany(cleanRecipes);
+    }
     return recipes;
   },
 
   // Agent Logs
   async getAgentLogs() {
-    const data = await readDb();
-    return data.agent_logs || [];
+    const database = await getDb();
+    const logs = await database.collection('agent_logs').find({}).toArray();
+    return logs.map(({ _id, ...rest }) => rest);
   },
 
   async saveAgentLogs(logs) {
-    const data = await readDb();
-    data.agent_logs = logs;
-    await writeDb(data);
+    const database = await getDb();
+    const col = database.collection('agent_logs');
+    await col.deleteMany({});
+    if (logs.length > 0) {
+      const cleanLogs = logs.map(({ _id, ...rest }) => rest);
+      await col.insertMany(cleanLogs);
+    }
     return logs;
   },
 
   // Settings
   async getSettings() {
-    const data = await readDb();
-    return data.settings || { geminiApiKey: "", aiProvider: "groq", openRouterApiKey: "", groqApiKey: "" };
+    const database = await getDb();
+    const settings = await database.collection('settings').findOne({});
+    if (!settings) {
+      return { geminiApiKey: "", aiProvider: "groq", openRouterApiKey: "", groqApiKey: "" };
+    }
+    const { _id, ...rest } = settings;
+    return rest;
   },
 
   async saveSettings(settings) {
-    const data = await readDb();
-    data.settings = settings;
-    await writeDb(data);
+    const database = await getDb();
+    const col = database.collection('settings');
+    await col.deleteMany({});
+    const { _id, ...rest } = settings;
+    await col.insertOne(rest);
     return settings;
   }
 };
