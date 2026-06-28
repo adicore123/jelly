@@ -536,7 +536,8 @@ async function handleCustomerFormSubmit(e) {
       renderCustomers();
       renderDashboard();
     } else {
-      throw new Error('שגיאה בשמירת הלקוח');
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'שגיאה בשמירת הלקוח');
     }
   } catch (error) {
     showToast(error.message, 'error');
@@ -557,7 +558,8 @@ async function deleteCustomer(id) {
       renderCustomers();
       renderDashboard();
     } else {
-      throw new Error('שגיאה במחיקת הלקוח');
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'שגיאה במחיקת הלקוח');
     }
   } catch (error) {
     showToast(error.message, 'error');
@@ -821,7 +823,8 @@ async function handleRecipeFormSubmit(e) {
       renderRecipes();
       renderDashboard();
     } else {
-      throw new Error('שגיאה בשמירת המתכון');
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'שגיאה בשמירת המתכון');
     }
   } catch (error) {
     showToast(error.message, 'error');
