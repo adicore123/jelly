@@ -20,17 +20,14 @@ async function getDb() {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 30000,
     });
-    clientPromise = client.connect().then(async () => {
-      const database = client.db('ribamanager');
-      await Promise.all([
-        database.collection('customers').createIndex({ id: 1 }, { unique: true }),
-        database.collection('recipes').createIndex({ id: 1 }, { unique: true }),
-      ]);
-    });
+    clientPromise = client.connect();
   }
 
   await clientPromise;
   dbInstance = client.db('ribamanager');
+  // Create indexes in background — failures never poison the connection
+  dbInstance.collection('customers').createIndex({ id: 1 }, { unique: true }).catch(() => {});
+  dbInstance.collection('recipes').createIndex({ id: 1 }, { unique: true }).catch(() => {});
   return dbInstance;
 }
 
