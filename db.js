@@ -4,78 +4,82 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 let client = null;
+let clientPromise = null;
 let dbInstance = null;
 
 async function getDb() {
   if (dbInstance) return dbInstance;
-  
+
   const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    throw new Error("MONGODB_URI is not defined in the environment variables!");
-  }
-  
-  if (!client) {
+  if (!uri) throw new Error('MONGODB_URI is not defined in the environment variables!');
+
+  if (!clientPromise) {
     client = new MongoClient(uri);
+    clientPromise = client.connect();
   }
-  
-  await client.connect();
+
+  await clientPromise;
   dbInstance = client.db('ribamanager');
   return dbInstance;
 }
 
 export const db = {
-  // Customers CRUD
+  // Customers
   async getCustomers() {
     const database = await getDb();
     const customers = await database.collection('customers').find({}).toArray();
     return customers.map(({ _id, ...rest }) => rest);
   },
 
-  async saveCustomers(customers) {
+  async upsertCustomer(customer) {
     const database = await getDb();
-    const col = database.collection('customers');
-    await col.deleteMany({});
-    if (customers.length > 0) {
-      const cleanCustomers = customers.map(({ _id, ...rest }) => rest);
-      await col.insertMany(cleanCustomers);
-    }
-    return customers;
+    const { _id, ...clean } = customer;
+    await database.collection('customers').replaceOne({ id: clean.id }, clean, { upsert: true });
+    return clean;
   },
 
-  // Recipes CRUD
+  async deleteCustomer(id) {
+    const database = await getDb();
+    await database.collection('customers').deleteOne({ id });
+  },
+
+  // Recipes
   async getRecipes() {
     const database = await getDb();
     const recipes = await database.collection('recipes').find({}).toArray();
     return recipes.map(({ _id, ...rest }) => rest);
   },
 
-  async saveRecipes(recipes) {
+  async upsertRecipe(recipe) {
     const database = await getDb();
-    const col = database.collection('recipes');
-    await col.deleteMany({});
-    if (recipes.length > 0) {
-      const cleanRecipes = recipes.map(({ _id, ...rest }) => rest);
-      await col.insertMany(cleanRecipes);
-    }
-    return recipes;
+    const { _id, ...clean } = recipe;
+    await database.collection('recipes').replaceOne({ id: clean.id }, clean, { upsert: true });
+    return clean;
+  },
+
+  async deleteRecipe(id) {
+    const database = await getDb();
+    await database.collection('recipes').deleteOne({ id });
   },
 
   // Agent Logs
   async getAgentLogs() {
     const database = await getDb();
-    const logs = await database.collection('agent_logs').find({}).toArray();
+    const logs = await database.collection('agent_logs').find({}).sort({ _id: -1 }).toArray();
     return logs.map(({ _id, ...rest }) => rest);
   },
 
-  async saveAgentLogs(logs) {
+  async appendAgentLog(log) {
     const database = await getDb();
     const col = database.collection('agent_logs');
-    await col.deleteMany({});
-    if (logs.length > 0) {
-      const cleanLogs = logs.map(({ _id, ...rest }) => rest);
-      await col.insertMany(cleanLogs);
+    const { _id, ...clean } = log;
+    await col.insertOne(clean);
+    // Keep only the 50 most recent logs
+    const count = await col.countDocuments();
+    if (count > 50) {
+      const oldest = await col.find({}).sort({ _id: 1 }).limit(count - 50).project({ _id: 1 }).toArray();
+      await col.deleteMany({ _id: { $in: oldest.map(d => d._id) } });
     }
-    return logs;
   },
 
   // Settings
@@ -83,7 +87,7 @@ export const db = {
     const database = await getDb();
     const settings = await database.collection('settings').findOne({});
     if (!settings) {
-      return { geminiApiKey: "", aiProvider: "groq", openRouterApiKey: "", groqApiKey: "" };
+      return { geminiApiKey: '', aiProvider: 'groq', openRouterApiKey: '', groqApiKey: '' };
     }
     const { _id, ...rest } = settings;
     return rest;
@@ -92,9 +96,8 @@ export const db = {
   async saveSettings(settings) {
     const database = await getDb();
     const col = database.collection('settings');
-    await col.deleteMany({});
-    const { _id, ...rest } = settings;
-    await col.insertOne(rest);
+    const { _id, ...clean } = settings;
+    await col.replaceOne({}, clean, { upsert: true });
     return settings;
   }
 };
