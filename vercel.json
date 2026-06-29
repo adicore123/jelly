@@ -1,15 +1,27 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
+    { "src": "public/**", "use": "@vercel/static" },
+    { "src": "server.js", "use": "@vercel/node" }
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/(app\\.js|style\\.css)",
+      "dest": "/public/$1",
+      "headers": { "cache-control": "public, max-age=86400, s-maxage=86400" }
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html",
+      "headers": { "cache-control": "public, max-age=0, must-revalidate" }
+    },
+    {
       "src": "/(.*)",
-      "dest": "server.js"
+      "dest": "/public/index.html"
     }
   ]
 }

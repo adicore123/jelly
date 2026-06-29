@@ -11,6 +11,9 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Pre-warm MongoDB connection at module load — reduces cold-start latency on first API request
+db.getSettings().catch(() => {});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
