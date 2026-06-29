@@ -665,8 +665,6 @@ window.editCustomer = (id) => {
   if (customer) openCustomerModal(customer);
 };
 
-window.deleteCustomer = (id) => deleteCustomer(id);
-
 window.matchPersonalJam = (id) => {
   const customer = state.customers.find(c => c.id === id);
   if (!customer) return;
@@ -966,8 +964,6 @@ window.editRecipe = (id) => {
   const recipe = state.recipes.find(r => r.id === id);
   if (recipe) openRecipeModal(recipe);
 };
-
-window.deleteRecipe = (id) => deleteRecipe(id);
 
 window.toggleRecipeDetails = (btn) => {
   const content = btn.nextElementSibling;
