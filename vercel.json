@@ -9,10 +9,9 @@
       "src": "/api/(.*)",
       "dest": "/server.js"
     },
-    {
       "src": "/(app\\.js|style\\.css)",
       "dest": "/public/$1",
-      "headers": { "cache-control": "public, max-age=86400, s-maxage=86400" }
+      "headers": { "cache-control": "public, max-age=0, s-maxage=86400, must-revalidate" }
     },
     {
       "src": "/",
