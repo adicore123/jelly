@@ -14,8 +14,19 @@ async function getDb() {
   if (!uri) throw new Error('MONGODB_URI is not defined in the environment variables!');
 
   if (!clientPromise) {
-    client = new MongoClient(uri);
-    clientPromise = client.connect();
+    client = new MongoClient(uri, {
+      maxPoolSize: 5,
+      connectTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 30000,
+    });
+    clientPromise = client.connect().then(async () => {
+      const database = client.db('ribamanager');
+      await Promise.all([
+        database.collection('customers').createIndex({ id: 1 }, { unique: true }),
+        database.collection('recipes').createIndex({ id: 1 }, { unique: true }),
+      ]);
+    });
   }
 
   await clientPromise;

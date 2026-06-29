@@ -127,17 +127,23 @@ app.get('/api/agent/sites', (req, res) => {
   res.json(MASTER_SITES);
 });
 
+// Settings cache (per warm instance)
+let _settingsCache = null;
+
 // Settings Endpoints
 app.get('/api/settings', async (req, res) => {
   try {
-    const settings = await db.getSettings();
+    if (!_settingsCache) {
+      _settingsCache = await db.getSettings();
+    }
+    const settings = _settingsCache;
     const hasEnvGeminiKey = !!process.env.GEMINI_API_KEY;
     const hasDbGeminiKey = !!settings.geminiApiKey;
     const hasEnvOpenRouterKey = !!process.env.OPENROUTER_API_KEY;
     const hasDbOpenRouterKey = !!settings.openRouterApiKey;
     const hasEnvGroqKey = !!process.env.GROQ_API_KEY;
     const hasDbGroqKey = !!settings.groqApiKey;
-    
+
     const aiProvider = settings.aiProvider || 'groq';
     let hasKey = false;
     if (aiProvider === 'groq') hasKey = hasEnvGroqKey || hasDbGroqKey;
@@ -162,14 +168,15 @@ app.get('/api/settings', async (req, res) => {
 app.post('/api/settings', async (req, res) => {
   try {
     const { geminiApiKey, aiProvider, openRouterApiKey, groqApiKey } = req.body;
-    const settings = await db.getSettings();
-    
+    const settings = _settingsCache || await db.getSettings();
+
     if (aiProvider !== undefined) settings.aiProvider = aiProvider;
     if (geminiApiKey !== undefined) settings.geminiApiKey = geminiApiKey;
     if (openRouterApiKey !== undefined) settings.openRouterApiKey = openRouterApiKey;
     if (groqApiKey !== undefined) settings.groqApiKey = groqApiKey;
-    
+
     await db.saveSettings(settings);
+    _settingsCache = settings;
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });

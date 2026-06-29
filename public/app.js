@@ -124,6 +124,9 @@ const elements = {
 // Selected fruits for Customer Modal
 let selectedFruits = new Set();
 
+// Cache for static agent sites list
+let _masterSitesCache = null;
+
 /* --- INIT APP --- */
 document.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
@@ -559,11 +562,17 @@ async function handleCustomerFormSubmit(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(customerData)
     });
-    
+
     if (res.ok) {
+      const saved = await res.json();
+      const idx = state.customers.findIndex(c => c.id === saved.id);
+      if (idx !== -1) {
+        state.customers[idx] = saved;
+      } else {
+        state.customers.push(saved);
+      }
       showToast(id ? 'פרטי הלקוח עודכנו' : 'לקוח חדש נוסף בהצלחה', 'success');
       closeCustomerModal();
-      await fetchCustomers();
       renderCustomers();
       renderDashboard();
     } else {
@@ -583,8 +592,8 @@ async function deleteCustomer(id) {
       });
       
       if (res.ok) {
+        state.customers = state.customers.filter(c => c.id !== id);
         showToast('הלקוח נמחק בהצלחה', 'success');
-        await fetchCustomers();
         renderCustomers();
         renderDashboard();
       } else {
@@ -846,9 +855,15 @@ async function handleRecipeFormSubmit(e) {
     });
     
     if (res.ok) {
+      const saved = await res.json();
+      const idx = state.recipes.findIndex(r => r.id === saved.id);
+      if (idx !== -1) {
+        state.recipes[idx] = saved;
+      } else {
+        state.recipes.push(saved);
+      }
       showToast(id ? 'המתכון עודכן בהצלחה' : 'מתכון חדש נשמר בספר', 'success');
       closeRecipeModal();
-      await fetchRecipes();
       populateRecipeFilters();
       populateProductionRecipes();
       renderRecipes();
@@ -870,8 +885,8 @@ async function deleteRecipe(id) {
       });
       
       if (res.ok) {
+        state.recipes = state.recipes.filter(r => r.id !== id);
         showToast('המתכון נמחק', 'success');
-        await fetchRecipes();
         populateRecipeFilters();
         populateProductionRecipes();
         renderRecipes();
@@ -1066,8 +1081,10 @@ function renderGeneratedRecipe(r) {
         body: JSON.stringify(r)
       });
       if (res.ok) {
+        const saved = await res.json();
+        const idx = state.recipes.findIndex(rec => rec.id === saved.id);
+        if (idx !== -1) { state.recipes[idx] = saved; } else { state.recipes.push(saved); }
         showToast('המתכון אומץ בהצלחה והתווסף לספר שלך!', 'success');
-        await fetchRecipes();
         populateRecipeFilters();
         populateProductionRecipes();
         const tabBtn = Array.from(elements.tabs).find(t => t.getAttribute('data-tab') === 'recipes-tab');
@@ -1374,11 +1391,20 @@ function renderAgentTab() {
 async function loadMasterSitesGrid() {
   const grid = document.getElementById('master-sites-grid');
   if (!grid) return;
+  const categoryIcons = { 'ישראלי': '🇮🇱', 'בינלאומי': '🌍', 'מדע ושימור': '🔬', 'שפים וארטיזנים': '👨‍🍳', 'ליקוט והתססה': '🌿', 'פורומים וקהילות': '💬' };
+  if (_masterSitesCache) {
+    grid.innerHTML = _masterSitesCache.map(s => `
+      <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="master-site-chip">
+        <span class="site-icon">${categoryIcons[s.category] || '🌐'}</span>
+        <span class="site-name">${s.name}</span>
+      </a>
+    `).join('');
+    return;
+  }
   try {
     const res = await fetch(`${API_BASE}/api/agent/sites`);
-    const sites = await res.json();
-    const categoryIcons = { 'ישראלי': '🇮🇱', 'בינלאומי': '🌍', 'מדע ושימור': '🔬', 'שפים וארטיזנים': '👨‍🍳', 'ליקוט והתססה': '🌿', 'פורומים וקהילות': '💬' };
-    grid.innerHTML = sites.map(s => `
+    _masterSitesCache = await res.json();
+    grid.innerHTML = _masterSitesCache.map(s => `
       <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="master-site-chip">
         <span class="site-icon">${categoryIcons[s.category] || '🌐'}</span>
         <span class="site-name">${s.name}</span>
@@ -1579,8 +1605,10 @@ window.adoptAgentRecipe = async (recipe) => {
       body: JSON.stringify(recipe)
     });
     if (res.ok) {
+      const saved = await res.json();
+      const idx = state.recipes.findIndex(r => r.id === saved.id);
+      if (idx !== -1) { state.recipes[idx] = saved; } else { state.recipes.push(saved); }
       showToast('המתכון אומץ בהצלחה והתווסף לספר שלך!', 'success');
-      await fetchRecipes();
       populateRecipeFilters();
       populateProductionRecipes();
       const tabBtn = Array.from(elements.tabs).find(t => t.getAttribute('data-tab') === 'recipes-tab');
