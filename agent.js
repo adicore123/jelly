@@ -603,9 +603,7 @@ async function callOpenRouterScan(apiKey) {
     offline: false
   };
 
-  const currentLogs = await db.getAgentLogs();
-  currentLogs.unshift(agentLog);
-  await db.saveAgentLogs(currentLogs.slice(0, 50));
+  await db.appendAgentLog(agentLog);
 
   return agentLog;
 }
@@ -736,9 +734,7 @@ async function callGeminiScanDirect(apiKey, enableSearch) {
     summary: parsedResult.summary, suggestions: parsedResult.suggestions,
     sources, offline: false
   };
-  const currentLogs = await db.getAgentLogs();
-  currentLogs.unshift(agentLog);
-  await db.saveAgentLogs(currentLogs.slice(0, 50));
+  await db.appendAgentLog(agentLog);
   return agentLog;
 }
 

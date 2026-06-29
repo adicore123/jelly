@@ -11,6 +11,9 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Pre-warm MongoDB connection at module load — reduces cold-start latency on first API request
+db.getSettings().catch(() => {});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -34,24 +37,11 @@ app.post('/api/customers', async (req, res) => {
     if (!customer.name) {
       return res.status(400).json({ error: 'Name is required' });
     }
-    
-    const customers = await db.getCustomers();
-    if (customer.id) {
-      // Update
-      const index = customers.findIndex(c => c.id === customer.id);
-      if (index !== -1) {
-        customers[index] = customer;
-      } else {
-        customers.push(customer);
-      }
-    } else {
-      // Create
+    if (!customer.id) {
       customer.id = 'c_' + Date.now();
       customer.purchaseHistory = customer.purchaseHistory || [];
-      customers.push(customer);
     }
-    
-    await db.saveCustomers(customers);
+    await db.upsertCustomer(customer);
     res.json(customer);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -60,17 +50,9 @@ app.post('/api/customers', async (req, res) => {
 
 app.delete('/api/customers/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    console.log(`[API] Deleting customer request received for ID: ${id}`);
-    let customers = await db.getCustomers();
-    const originalCount = customers.length;
-    customers = customers.filter(c => c.id !== id);
-    console.log(`[API] Filtering complete. Original count: ${originalCount}, New count: ${customers.length}`);
-    await db.saveCustomers(customers);
-    console.log(`[API] Save complete. Customer deleted successfully.`);
+    await db.deleteCustomer(req.params.id);
     res.json({ success: true });
   } catch (error) {
-    console.error(`[API] Delete customer error for ID ${req.params.id}:`, error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -91,23 +73,10 @@ app.post('/api/recipes', async (req, res) => {
     if (!recipe.name) {
       return res.status(400).json({ error: 'Recipe name is required' });
     }
-
-    const recipes = await db.getRecipes();
-    if (recipe.id) {
-      // Update
-      const index = recipes.findIndex(r => r.id === recipe.id);
-      if (index !== -1) {
-        recipes[index] = recipe;
-      } else {
-        recipes.push(recipe);
-      }
-    } else {
-      // Create
+    if (!recipe.id) {
       recipe.id = 'r_' + Date.now();
-      recipes.push(recipe);
     }
-
-    await db.saveRecipes(recipes);
+    await db.upsertRecipe(recipe);
     res.json(recipe);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -116,10 +85,7 @@ app.post('/api/recipes', async (req, res) => {
 
 app.delete('/api/recipes/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    let recipes = await db.getRecipes();
-    recipes = recipes.filter(r => r.id !== id);
-    await db.saveRecipes(recipes);
+    await db.deleteRecipe(req.params.id);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -164,17 +130,23 @@ app.get('/api/agent/sites', (req, res) => {
   res.json(MASTER_SITES);
 });
 
+// Settings cache (per warm instance)
+let _settingsCache = null;
+
 // Settings Endpoints
 app.get('/api/settings', async (req, res) => {
   try {
-    const settings = await db.getSettings();
+    if (!_settingsCache) {
+      _settingsCache = await db.getSettings();
+    }
+    const settings = _settingsCache;
     const hasEnvGeminiKey = !!process.env.GEMINI_API_KEY;
     const hasDbGeminiKey = !!settings.geminiApiKey;
     const hasEnvOpenRouterKey = !!process.env.OPENROUTER_API_KEY;
     const hasDbOpenRouterKey = !!settings.openRouterApiKey;
     const hasEnvGroqKey = !!process.env.GROQ_API_KEY;
     const hasDbGroqKey = !!settings.groqApiKey;
-    
+
     const aiProvider = settings.aiProvider || 'groq';
     let hasKey = false;
     if (aiProvider === 'groq') hasKey = hasEnvGroqKey || hasDbGroqKey;
@@ -199,14 +171,15 @@ app.get('/api/settings', async (req, res) => {
 app.post('/api/settings', async (req, res) => {
   try {
     const { geminiApiKey, aiProvider, openRouterApiKey, groqApiKey } = req.body;
-    const settings = await db.getSettings();
-    
+    const settings = _settingsCache || await db.getSettings();
+
     if (aiProvider !== undefined) settings.aiProvider = aiProvider;
     if (geminiApiKey !== undefined) settings.geminiApiKey = geminiApiKey;
     if (openRouterApiKey !== undefined) settings.openRouterApiKey = openRouterApiKey;
     if (groqApiKey !== undefined) settings.groqApiKey = groqApiKey;
-    
+
     await db.saveSettings(settings);
+    _settingsCache = settings;
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
